@@ -1,9 +1,65 @@
-:root {
-  --page-background: #101827;
-  --panel-background: #182338;
-  --main-text: #f8fafc;
-  --muted-text: #cbd5e1;
-  --accent-color: #60a5fa;
-  --content-width: 1000px;
-  --image-rounding: 14px;
+
+const CHARACTER = {
+  hair: "#382419",
+  skin: "#d99a70",
+  eyeGreen: "#35b85a",
+  suit: "#173a70",
+  shirt: "#ffffff",
+  tie: "#d92735",
+  pants: "#17345f",
+  shoes: "#111318"
+};
+
+const canvas = document.getElementById("characterCanvas");
+const ctx = canvas.getContext("2d");
+const PIXEL = 8;
+
+// Draw one square of pixel art.
+function rect(x, y, width, height, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(
+    x * PIXEL,
+    y * PIXEL,
+    width * PIXEL,
+    height * PIXEL
+  );
 }
+
+// Example: draw the character's hair, face,
+// green eyes, blue suit, red tie, and shoes.
+function drawCharacter() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Background
+  rect(0, 0, 40, 50, "#142544");
+
+  // Hair
+  rect(12, 5, 16, 4, CHARACTER.hair);
+
+  // Face
+  rect(12, 7, 16, 11, CHARACTER.skin);
+
+  // Green eyes
+  rect(16, 11, 2, 3, CHARACTER.eyeGreen);
+  rect(22, 11, 2, 3, CHARACTER.eyeGreen);
+
+  // Blue suit
+  rect(10, 20, 20, 14, CHARACTER.suit);
+
+  // White shirt
+  rect(17, 20, 6, 12, CHARACTER.shirt);
+
+  // Red tie
+  rect(18, 21, 4, 3, CHARACTER.tie);
+  rect(19, 24, 2, 6, CHARACTER.tie);
+  rect(18, 30, 4, 2, CHARACTER.tie);
+
+  // Pants
+  rect(12, 34, 16, 9, CHARACTER.pants);
+
+  // Black shoes
+  rect(11, 42, 9, 3, CHARACTER.shoes);
+  rect(21, 42, 9, 3, CHARACTER.shoes);
+}
+
+drawCharacter();
