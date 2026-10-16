@@ -509,25 +509,7 @@ function hold(id,k){
 }
 hold("mf","w");hold("mb","s");hold("ml","a");hold("mr","d");
 
-function animate(now){
- requestAnimationFrame(animate);
- const dt=Math.min((now-lastTime)/16.67,2);
- lastTime=now;
-
- if(running){
-  const speed=.075*dt;
-  const forward=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0);
-  const side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);
-  const direction=new THREE.Vector3();
-  camera.getWorldDirection(direction);
-  direction.y=0;
-  direction.normalize();
-  const right=new THREE.Vector3().crossVectors(direction,new THREE.Vector3(0,1,0)).negate();
-  camera.position.addScaledVector(direction,forward*speed);
-  camera.position.addScaledVector(right,side*speed);
-  camera.position.x=Math.max(-8,Math.min(8,camera.position.x));
-  camera.position.z=Math.max(-7,Math.min(7,camera.position.z));
- }
+function animate(now)
 
  if(spinning){
   parts.forEach(p=>p.rotation.y+=.045*dt);
