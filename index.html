@@ -3,532 +3,682 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fidget Lab 3D</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fidget Lab 3D | Factory & Retail Simulator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#101522;color:white;font-family:Arial,sans-serif}
-canvas{display:block}
-#ui{position:fixed;inset:0;pointer-events:none}
-.panel{pointer-events:auto;background:rgba(17,23,39,.91);border:1px solid #53617d;border-radius:12px;backdrop-filter:blur(12px);box-shadow:0 8px 35px #0005}
-#brand{position:absolute;top:18px;left:18px;padding:13px 17px}
-#brand strong{font-size:20px;letter-spacing:2px;color:#70e9ff}
-#brand small{display:block;color:#b3bed3;margin-top:5px}
-#tools{position:absolute;top:18px;right:18px;width:205px;padding:14px}
-h3{font-size:12px;letter-spacing:2px;color:#8cecff;margin:0 0 10px}
-button{cursor:pointer;color:white;background:#283650;border:1px solid #536887;border-radius:7px;padding:10px;font-weight:bold;transition:.15s}
-button:hover{background:#3e5578;transform:translateY(-1px)}
-button.active{background:#146d86;border-color:#72edff;box-shadow:0 0 12px #38d9ff45}
-#tools button{width:100%;margin-bottom:6px;text-align:left}
-#tools button span{float:right;color:#8cecff}
-#bottom{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);width:min(600px,94vw);padding:12px}
-#bottom h3{text-align:center}
-#palette{display:flex;justify-content:center;gap:7px;flex-wrap:wrap}
-.swatch{width:34px;height:34px;border:2px solid #ffffff70;border-radius:8px;padding:0}
-.swatch.active{outline:2px solid white;outline-offset:2px}
-#status{text-align:center;font-size:12px;color:#bdcbe0;margin-top:10px}
-#crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:23px;color:#fff;text-shadow:0 0 6px #000}
-#hint{position:absolute;left:18px;bottom:20px;color:#d0d8e9;font-size:12px;line-height:1.8;text-shadow:0 2px 4px #000}
-#toast{position:absolute;top:23%;left:50%;transform:translateX(-50%);background:#101827d9;border:1px solid #6c809c;padding:11px 18px;border-radius:8px;opacity:0;transition:opacity .2s}
-#overlay{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(120deg,#0c1428ed,#12233ddd);z-index:5;padding:20px}
-#intro{max-width:530px;text-align:center;padding:32px;background:#18253c;border:1px solid #6688ad;border-radius:20px;box-shadow:0 25px 100px #0009}
-#intro h1{font-size:clamp(30px,6vw,48px);margin:0;color:#75ecff}
-#intro p{line-height:1.7;color:#cbd6e8}
-#play{background:linear-gradient(110deg,#168caa,#625be5);border:0;padding:15px 32px;font-size:16px;border-radius:10px}
-#mobile{display:none;position:absolute;left:12px;bottom:125px;pointer-events:auto}
-#mobile button{width:44px;height:44px;padding:0;font-size:19px}
-@media(max-width:650px){
- #brand{top:8px;left:8px;padding:8px}
- #brand strong{font-size:14px}
- #tools{top:8px;right:8px;width:145px;padding:9px}
- #tools button{padding:7px;font-size:11px}
- #bottom{bottom:8px;padding:8px}
- #hint{display:none}
- #mobile{display:block}
+body{margin:0;overflow:hidden;background:#151b25;color:#f2f5fa;font:14px Arial,sans-serif}
+#world{position:fixed;inset:0}
+.panel{background:rgba(17,23,34,.96);border:1px solid #455168;border-radius:13px;padding:14px;box-shadow:0 8px 28px #0005}
+#top{position:fixed;z-index:2;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;pointer-events:none}
+#brand{font-size:20px;font-weight:900;color:#75f5cd}
+.stats{display:flex;gap:15px;flex-wrap:wrap;font-weight:bold}
+#left,#right{position:fixed;z-index:2;top:75px;bottom:48px;width:265px;overflow-y:auto;pointer-events:auto}
+#left{left:12px}
+#right{right:12px}
+h2{font-size:17px;margin:0 0 12px}
+h3{font-size:13px;color:#86e8d0;margin:16px 0 7px}
+label{display:block;font-size:12px;color:#b9c5d8;margin-top:9px}
+input,select,button{width:100%;padding:10px;margin-top:5px;border-radius:7px;border:1px solid #47546b;background:#222c3d;color:white;font:inherit}
+input[type=color]{height:40px;padding:3px}
+button{cursor:pointer;transition:background .15s}
+button:hover{background:#40526a}
+button.primary{background:#00a982;color:#071c17;border:0;font-weight:bold}
+button.danger{background:#753c4b}
+.row{display:flex;gap:6px}
+.row>*{flex:1;min-width:0}
+.muted{color:#aab8cd;font-size:12px;line-height:1.5}
+.card{padding:10px;background:#222c3d;border-radius:9px;margin:8px 0}
+.card strong{display:block;margin-bottom:5px}
+#hint{position:fixed;bottom:10px;left:12px;color:white;font-size:12px;text-shadow:0 2px 5px black;pointer-events:none}
+#toast{position:fixed;z-index:5;bottom:48px;left:50%;transform:translateX(-50%);padding:12px 18px;background:#122d30;border:1px solid #75f5cd;border-radius:10px;display:none;max-width:90vw;text-align:center}
+#cross{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-size:20px;text-shadow:0 1px 5px black;pointer-events:none}
+#shopClosed{color:#ffb2b2}
+@media(max-width:700px){
+ #top{align-items:flex-start}
+ #brand{font-size:14px}
+ .stats{font-size:11px;gap:6px}
+ #left,#right{top:90px;width:43%;bottom:45px}
+ #left{left:7px}#right{right:7px}
+ .panel{padding:9px}
+ h2{font-size:14px}
+ input,select,button{padding:8px;font-size:12px}
 }
 </style>
 </head>
 <body>
-<div id="ui">
- <div id="brand" class="panel">
-  <strong>✦ FIDGET LAB 3D</strong>
-  <small>DESIGN • BUILD • PLAY</small>
- </div>
+<div id="world"></div>
 
- <div id="tools" class="panel">
-  <h3>BUILD MENU</h3>
-  <button data-mode="spinner" class="active">✦ Fidget spinner <span>01</span></button>
-  <button data-mode="clicker">▣ Mechanical clicker <span>02</span></button>
-  <button data-mode="cube">⬡ Infinity cube <span>03</span></button>
-  <button data-mode="custom">＋ Custom parts <span>04</span></button>
-  <hr style="border-color:#34435e;margin:10px 0">
-  <button id="spin">▶ Spin my toy</button>
-  <button id="remove">⌫ Remove last part</button>
-  <button id="clear">↻ Clear workbench</button>
-  <button id="save">↓ Save design</button>
- </div>
-
- <div id="crosshair">+</div>
- <div id="toast"></div>
-
- <div id="hint">
-  WASD — Move &nbsp; Mouse — Look<br>
-  Click workbench — Place part<br>
-  Q / E — Rotate part<br>
-  Click a part — Select it<br>
-  ESC — Release mouse
- </div>
-
- <div id="mobile">
-  <button id="mf">▲</button><br>
-  <button id="ml">◀</button>
-  <button id="mb">▼</button>
-  <button id="mr">▶</button>
- </div>
-
- <div id="bottom" class="panel">
-  <h3>✦ MATERIAL & COLOUR</h3>
-  <div id="palette"></div>
-  <div id="status">Spinner mode · Pick a material and click the workbench</div>
- </div>
+<div id="top" class="panel">
+  <div id="brand">⚙ FIDGET LAB 3D</div>
+  <div class="stats">
+    <span>💵 $<b id="money">750</b></span>
+    <span>📦 <b id="inventory">0</b></span>
+    <span>🛒 <b id="sold">0</b> sold</span>
+    <span>⭐ <b id="rating">50</b></span>
+  </div>
 </div>
 
-<div id="overlay">
- <div id="intro">
-  <h1>FIDGET LAB</h1>
-  <p>Welcome to your personal 3D toy workshop. Create glossy fidget spinners, mechanical clickers, infinity cubes, and completely original designs.</p>
-  <p>Walk around in first person, choose your materials, and build something satisfying.</p>
-  <button id="play">ENTER WORKSHOP →</button>
-  <p style="font-size:11px">Requires an internet connection to load the 3D engine.</p>
- </div>
+<div id="left" class="panel">
+  <h2>🎨 Design Studio</h2>
+
+  <label>Product name</label>
+  <input id="productName" maxlength="24" value="Neon Spinner">
+
+  <label>Fidget type</label>
+  <select id="productType">
+    <option value="spinner">Tri-spinner</option>
+    <option value="clicker">Clicker</option>
+    <option value="cube">Infinity cube</option>
+    <option value="ring">Glow ring</option>
+    <option value="orb">Crystal orb</option>
+  </select>
+
+  <label>Color</label>
+  <input id="productColor" type="color" value="#35eac0">
+
+  <label>Material</label>
+  <select id="productMaterial">
+    <option value="plastic">Standard plastic · $8</option>
+    <option value="metal">Premium metal · $18</option>
+    <option value="glow">Glow material · $14</option>
+    <option value="crystal">Crystal finish · $22</option>
+  </select>
+
+  <label>Decoration</label>
+  <select id="productDetail">
+    <option value="plain">Minimal</option>
+    <option value="stripe">Accent ring</option>
+    <option value="studs">Metal studs</option>
+  </select>
+
+  <div class="card">
+    <strong id="previewTitle">Neon Spinner</strong>
+    <div class="muted" id="previewInfo">Tri-spinner · Plastic</div>
+    <div class="muted">Manufacturing cost: $<b id="cost">8</b></div>
+    <div class="muted">Suggested retail: $<b id="suggested">20</b></div>
+  </div>
+
+  <button id="previewButton">👁 Preview design</button>
+  <button id="manufacture" class="primary">🔧 Manufacture one</button>
+  <button id="batch">🏭 Manufacture five</button>
+
+  <h3>Your Products</h3>
+  <div id="designList" class="muted">Your designs will appear here.</div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<div id="right" class="panel">
+  <h2>🏪 Retail Store</h2>
+  <div class="muted">Make products in the workshop, then move them to your store shelves.</div>
+
+  <label>Select product</label>
+  <select id="retailProduct"></select>
+
+  <label>Price per item ($)</label>
+  <input id="retailPrice" type="number" min="1" max="500" value="25">
+
+  <div class="row">
+    <button id="stockOne" class="primary">Stock 1</button>
+    <button id="stockAll">Stock all</button>
+  </div>
+
+  <div class="card">
+    <strong>Retail overview</strong>
+    <div class="muted" id="retailInfo">Create a product to begin.</div>
+  </div>
+
+  <button id="storeToggle" class="primary">Close the store</button>
+  <div id="shopClosed" class="muted"></div>
+
+  <h3>🚶 Customers</h3>
+  <div id="customerInfo" class="muted">Your store is waiting for its first shoppers.</div>
+
+  <h3>📈 Business</h3>
+  <div class="card">
+    <div class="muted">Revenue: $<b id="revenue">0</b></div>
+    <div class="muted">Manufacturing expenses: $<b id="expenses">0</b></div>
+    <div class="muted">Net earnings: $<b id="profit">0</b></div>
+  </div>
+
+  <button id="save">💾 Save game</button>
+  <button id="load">📂 Load game</button>
+  <button id="reset" class="danger">Reset game</button>
+</div>
+
+<div id="cross">+</div>
+<div id="hint">WASD move · Mouse look · Click the 3D world to play · Esc unlocks mouse</div>
+<div id="toast"></div>
+
 <script>
 (() => {
-const canvasRenderer = new THREE.WebGLRenderer({antialias:true});
-canvasRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
-canvasRenderer.setSize(innerWidth,innerHeight);
-canvasRenderer.shadowMap.enabled=true;
-canvasRenderer.shadowMap.type=THREE.PCFSoftShadowMap;
-canvasRenderer.outputEncoding=THREE.sRGBEncoding;
-canvasRenderer.toneMapping=THREE.ACESFilmicToneMapping;
-canvasRenderer.toneMappingExposure=1.15;
-document.body.prepend(canvasRenderer.domElement);
+"use strict";
+
+const $ = id => document.getElementById(id);
+const MATERIALS = {
+  plastic:{name:"Plastic",cost:8,roughness:.28,metalness:.08},
+  metal:{name:"Premium Metal",cost:18,roughness:.18,metalness:.9},
+  glow:{name:"Glow Material",cost:14,roughness:.3,metalness:.05},
+  crystal:{name:"Crystal Finish",cost:22,roughness:.12,metalness:.2}
+};
+const TYPES = {
+  spinner:"Tri-spinner",clicker:"Clicker",cube:"Infinity cube",
+  ring:"Glow ring",orb:"Crystal orb"
+};
+
+let money=750, revenue=0, expenses=0, sold=0, rating=50;
+let designs=[], inventory={}, shelfStock={};
+let shopOpen=true, selectedPreview=null, previewMesh=null;
+let nextId=1, lastCustomer="", elapsed=0;
+const keys={};
+let yaw=0,pitch=0,locked=false;
+let toastTimer;
 
 const scene=new THREE.Scene();
-scene.background=new THREE.Color("#8cb8d6");
-scene.fog=new THREE.Fog("#8cb8d6",17,43);
+scene.background=new THREE.Color(0xa7b8c9);
+scene.fog=new THREE.Fog(0xa7b8c9,24,65);
 
-const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,100);
-camera.position.set(0,1.7,5);
+const camera=new THREE.PerspectiveCamera(74,innerWidth/innerHeight,.1,150);
+camera.position.set(0,1.7,8);
+camera.rotation.order="YXZ";
 
-scene.add(new THREE.HemisphereLight(0xd9edff,0x394054,2));
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.05;
+$("world").appendChild(renderer.domElement);
 
-const keyLight=new THREE.DirectionalLight(0xfff0d8,3.5);
-keyLight.position.set(-5,10,5);
-keyLight.castShadow=true;
-keyLight.shadow.mapSize.set(2048,2048);
-keyLight.shadow.camera.left=-12;
-keyLight.shadow.camera.right=12;
-keyLight.shadow.camera.top=12;
-keyLight.shadow.camera.bottom=-12;
-scene.add(keyLight);
+scene.add(new THREE.HemisphereLight(0xe8f2ff,0x41404b,1.8));
 
-const fill=new THREE.PointLight(0x58cfff,45,18);
-fill.position.set(4,4,1);
-scene.add(fill);
+const sun=new THREE.DirectionalLight(0xfff0d8,2.2);
+sun.position.set(-5,10,6);
+sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.left=-16;
+sun.shadow.camera.right=16;
+sun.shadow.camera.top=16;
+sun.shadow.camera.bottom=-16;
+sun.shadow.bias=-.0005;
+scene.add(sun);
 
-const pinkLight=new THREE.PointLight(0xff59c9,24,12);
-pinkLight.position.set(-5,3,-3);
-scene.add(pinkLight);
-
-const mat=(color,roughness=.25,metalness=.12,extra={})=>
- new THREE.MeshStandardMaterial({color,roughness,metalness,...extra});
-
-const floorMat=mat("#30394b",.8);
-const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),floorMat);
-floor.rotation.x=-Math.PI/2;
-floor.position.y=-.04;
-floor.receiveShadow=true;
-scene.add(floor);
-
-// Workshop floor details
-for(let x=-30;x<=30;x+=2){
- const line=new THREE.Mesh(new THREE.BoxGeometry(.012,.005,60),mat("#566175",.8));
- line.position.set(x,.001,-10);
- scene.add(line);
+for(const x of [-6,-2,2,6]){
+ const light=new THREE.PointLight(0xdceaff,30,14);
+ light.position.set(x,4.2,-1);
+ scene.add(light);
 }
-for(let z=-38;z<=20;z+=2){
- const line=new THREE.Mesh(new THREE.BoxGeometry(60,.005,.012),mat("#566175",.8));
- line.position.set(0,.001,z);
- scene.add(line);
+for(const x of [-6,-4,-2]){
+ const light=new THREE.PointLight(0xffd5a1,18,9);
+ light.position.set(x,3.5,-4);
+ scene.add(light);
 }
 
-// Walls and studio panels
-function box(w,h,d,material,x,y,z){
- const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
+function material(color,roughness=.5,metalness=0){
+ return new THREE.MeshStandardMaterial({color,roughness,metalness});
+}
+function box(w,h,d,color,x,y,z,rough=.5,metal=0){
+ const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material(color,rough,metal));
  mesh.position.set(x,y,z);
- mesh.castShadow=true;
- mesh.receiveShadow=true;
+ mesh.castShadow=true;mesh.receiveShadow=true;
  scene.add(mesh);
  return mesh;
 }
-box(20,7,.3,mat("#202c42",.7),0,3.4,-9);
-box(.3,7,18,mat("#26374f",.7),-10,3.4,0);
-box(.3,7,18,mat("#26374f",.7),10,3.4,0);
-
-for(let i=0;i<5;i++){
- box(1.4,.04,.05,mat(i%2?"#4ce4ff":"#b86cff",.3,.3),
-     -7+i*3.5,4.8,-8.8);
+function cylinder(r,h,color,x,y,z,segments=32,metal=0){
+ const mesh=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,segments),material(color,.25,metal));
+ mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;
+ scene.add(mesh);return mesh;
 }
 
-// Workbench
-const tableTopY=1.03;
-box(7,.28,5,mat("#272d3b",.32,.3),0,.85,-2);
-box(7.1,.07,5.1,mat("#66758c",.25,.45),0,1.01,-2);
-for(const x of [-3,3]){
- for(const z of [-3.9,-.1]){
-  box(.18,.83,.18,mat("#303747",.35,.5),x,.43,z);
+// Industrial concrete floor
+const floorCanvas=document.createElement("canvas");
+floorCanvas.width=floorCanvas.height=256;
+const ctx=floorCanvas.getContext("2d");
+ctx.fillStyle="#858990";ctx.fillRect(0,0,256,256);
+for(let i=0;i<4000;i++){
+ const v=100+Math.random()*100;
+ ctx.fillStyle=`rgba(${v},${v},${v},.12)`;
+ ctx.fillRect(Math.random()*256,Math.random()*256,2,2);
+}
+const floorTexture=new THREE.CanvasTexture(floorCanvas);
+floorTexture.wrapS=floorTexture.wrapT=THREE.RepeatWrapping;
+floorTexture.repeat.set(8,8);
+floorTexture.encoding=THREE.sRGBEncoding;
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(40,40),
+ new THREE.MeshStandardMaterial({map:floorTexture,roughness:.85}));
+floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;floor.position.y=-.04;
+scene.add(floor);
+
+// Industrial wall
+box(18,6,.3,0x697b90,0,3,-6,.85);
+for(let x=-8;x<=8;x+=2){
+ box(.035,5,.04,0x93a2b2,x,3,-5.82,.7);
+}
+for(const x of [-6,-2,2,6]){
+ box(1.6,.12,.6,0x303b4a,x,5,-2);
+ const lamp=new THREE.Mesh(new THREE.BoxGeometry(1.3,.05,.4),
+ material(0xf6f1dc,.3));
+ lamp.position.set(x,4.92,-2);scene.add(lamp);
+}
+
+// Workshop workbench
+box(4,.2,1.5,0x4c5969,0,1,-2,.5);
+box(4,.12,1.55,0x303844,0,.86,-2,.3,.3);
+for(const x of [-1.7,1.7])for(const z of [-2.55,-1.45]){
+ box(.14,.85,.14,0x323c4c,x,.4,z,.5,.3);
+}
+// Tool drawers
+for(let x=-1.2;x<=1.2;x+=.8){
+ box(.65,.25,.04,0x738092,x,.55,-1.22,.4,.15);
+ box(.1,.04,.04,0xb9c6d3,x,.55,-1.18,.3,.7);
+}
+
+// Retail shelving
+box(4,.95,.9,0x344154,-5,.48,-3.3,.45);
+box(4,.12,1,0x64748a,-5,1,-3.3,.35,.25);
+for(const y of [1.65,2.35,3.05]){
+ box(4,.08,.55,0x4c5b70,-5,y,-4,.4,.2);
+ for(let x=-6.6;x<=-3.4;x+=.8){
+  box(.08,.7,.08,0x66768b,x,y+.34,-4,.45,.25);
  }
 }
-
-// Grid printed on work surface
-for(let x=-3.3;x<=3.31;x+=.5){
- const line=box(.009,.009,4.8,mat("#a3b6c9",.65),x,1.052,-2);
- line.castShadow=false;
+// Register
+box(.65,.6,.5,0x303a49,-3.8,1.3,-2.9,.3,.2);
+box(.4,.24,.06,0x56eac7,-3.8,1.65,-2.85,.2);
+box(2.6,.1,.8,0x5a6b80,5,1,-3,.45,.2);
+box(2.6,.1,.8,0x5a6b80,5,2,-3,.45,.2);
+for(const x of [4,5,6]){
+ box(.15,2,.15,0x394657,x,1,-3.4,.5,.2);
 }
-for(let z=-4.3;z<=.31;z+=.5){
- const line=box(6.8,.009,.009,mat("#a3b6c9",.65),0,1.053,z);
- line.castShadow=false;
+for(const x of [-5.8,-5,-4.2]){
+ cylinder(.12,.1,0x39dfb5,x,1.2,-3.3,24,.3);
 }
 
-// Background shelves
-for(let y of [2.3,3.8]){
- box(4,.13,.65,mat("#3e4d63",.4,.25),-6,y,-5.8);
- for(let i=0;i<5;i++){
-  const colors=["#f26ca7","#5be3f3","#a78bfa","#f4c45c","#64d9a5"];
-  const toy= new THREE.Mesh(
-   new THREE.TorusGeometry(.18,.065,10,24),
-   mat(colors[i],.2,.3)
-  );
-  toy.position.set(-7.5+i*.7,y+.22,-5.8);
-  toy.castShadow=true;
-  scene.add(toy);
+// Ceiling beams
+for(const z of [-5,0,5]){
+ box(18,.15,.18,0x536275,0,5.65,z,.6,.3);
+}
+
+// Fidget model creator
+function makeFidget(d,scale=1){
+ const group=new THREE.Group();
+ const setting=MATERIALS[d.material]||MATERIALS.plastic;
+ const col=new THREE.Color(d.color);
+ const bodyMat=new THREE.MeshStandardMaterial({
+  color:col,roughness:setting.roughness,metalness:setting.metalness,
+  emissive:d.material==="glow"?col.clone().multiplyScalar(.18):0x000000,
+  emissiveIntensity:.8
+ });
+ const dark=material(0x202a37,.2,.85);
+ const silver=material(0xe5ebf4,.2,.8);
+
+ function add(geo,mat,x=0,y=0,z=0){
+  const m=new THREE.Mesh(geo,mat);
+  m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;
+  group.add(m);return m;
  }
+ function cyl(r,h,mat,x=0,y=0,z=0,n=32){
+  return add(new THREE.CylinderGeometry(r,r,h,n),mat,x,y,z);
+ }
+ if(d.type==="spinner"){
+  cyl(.25,.17,bodyMat);
+  for(let i=0;i<3;i++){
+   const a=i*Math.PI*2/3,x=Math.cos(a)*.64,z=Math.sin(a)*.64;
+   cyl(.3,.15,bodyMat,x,0,z,40);
+   cyl(.12,.17,silver,x,.01,z,24);
+   cyl(.06,.19,dark,x,.01,z,24);
+  }
+  cyl(.14,.2,silver);
+  cyl(.08,.22,dark);
+ }else if(d.type==="clicker"){
+  add(new THREE.BoxGeometry(.9,.2,.62),bodyMat);
+  for(const x of [-.24,0,.24]){
+   cyl(.13,.12,silver,x,.14,0,24);
+   cyl(.09,.06,dark,x,.22,0,24);
+  }
+ }else if(d.type==="cube"){
+  for(let i=0;i<3;i++){
+   const b=add(new THREE.BoxGeometry(.3,.3,.3),bodyMat,(i-1)*.29,0,0);
+   b.rotation.y=i*.12;
+   add(new THREE.BoxGeometry(.28,.28,.28),dark,(i-1)*.29,-.02,.17);
+  }
+ }else if(d.type==="ring"){
+  add(new THREE.TorusGeometry(.42,.12,20,56),bodyMat);
+  add(new THREE.TorusGeometry(.25,.045,12,40),silver);
+  cyl(.09,.16,dark);
+ }else{
+  add(new THREE.IcosahedronGeometry(.43,2),bodyMat);
+  add(new THREE.IcosahedronGeometry(.17,1),silver);
+ }
+ if(d.detail==="stripe"){
+  add(new THREE.TorusGeometry(.43,.025,8,48),silver,0,.1,0);
+ }
+ if(d.detail==="studs"){
+  for(let i=0;i<6;i++){
+   const a=i*Math.PI/3;
+   cyl(.045,.05,silver,Math.cos(a)*.4,.12,Math.sin(a)*.4,12);
+  }
+ }
+ group.scale.setScalar(scale);
+ return group;
 }
-
-// Materials
-const palette=[
- ["Cyber blue","#16d9ff"],["Hot pink","#ff3e9d"],
- ["Violet","#9a5cff"],["Lime","#8aff42"],
- ["Sunset orange","#ff8b35"],["Ice white","#eaf4ff"],
- ["Ruby red","#f23c53"],["Gold","#ffd45c"],
- ["Obsidian","#252b3a"],["Mint","#5bffd0"]
-];
-let chosenColor=palette[0][1];
-let mode="spinner";
-let selectedObject=null;
-let spinning=false;
-let lastTime=performance.now();
-const parts=[];
-const raycaster=new THREE.Raycaster();
-const pointer=new THREE.Vector2(0,0);
-const buildPlane=new THREE.Plane(new THREE.Vector3(0,1,0),-tableTopY);
-const hitPoint=new THREE.Vector3();
-const keys={};
-let mouseLocked=false;
-
-const paletteUI=document.getElementById("palette");
-palette.forEach(([name,color],i)=>{
- const b=document.createElement("button");
- b.className="swatch"+(i===0?" active":"");
- b.style.background=color;
- b.title=name;
- b.onclick=()=>{
-  chosenColor=color;
-  [...paletteUI.children].forEach((el,j)=>el.classList.toggle("active",i===j));
-  document.getElementById("status").textContent=name+" selected";
+function typeName(t){return TYPES[t]||t}
+function draft(){
+ return {
+  id:"p"+(nextId++),
+  name:$("productName").value.trim()||"My Fidget",
+  type:$("productType").value,
+  color:$("productColor").value,
+  material:$("productMaterial").value,
+  detail:$("productDetail").value,
+  cost:MATERIALS[$("productMaterial").value].cost
  };
- paletteUI.appendChild(b);
-});
-
-function shiny(color){
- return mat(color,.19,.32,{metalness:.28});
 }
-function makeMesh(geometry,material,x,y,z,parent){
- const m=new THREE.Mesh(geometry,material);
- m.position.set(x,y,z);
- m.castShadow=true;
- m.receiveShadow=true;
- (parent||scene).add(m);
- return m;
-}
-
-function register(group,label){
- group.userData.label=label;
- group.userData.isToyPart=true;
- parts.push(group);
- scene.add(group);
- selectedObject=group;
- updateStatus();
-}
-
-function addPiece(geometry,x,y,z,color=chosenColor,label="Part"){
- const g=new THREE.Group();
- g.position.set(x,y,z);
- makeMesh(geometry,shiny(color),0,0,0,g);
- register(g,label);
- return g;
-}
-
-function bearing(parent,x,y,z,r=.19){
- const metal=mat("#c6d6e9",.15,.85);
- const black=mat("#303b4c",.2,.6);
- makeMesh(new THREE.CylinderGeometry(r,r,.09,32),black,x,y,z,parent);
- makeMesh(new THREE.TorusGeometry(r*.65,.035,10,32),metal,x,y+.055,z,parent);
- makeMesh(new THREE.CylinderGeometry(r*.26,r*.26,.11,24),metal,x,y+.02,z,parent);
-}
-
-function addSpinner(x=0,z=-2){
- const g=new THREE.Group();
- g.position.set(x,tableTopY+.13,z);
- const color=chosenColor;
- const body=shiny(color);
- makeMesh(new THREE.CylinderGeometry(.34,.34,.13,48),body,0,0,0,g);
- makeMesh(new THREE.TorusGeometry(.31,.025,12,48),mat("#eaf6ff",.12,.8),0,.07,0,g);
- bearing(g,0,.07,0,.17);
-
- for(let i=0;i<3;i++){
-  const a=i*Math.PI*2/3;
-  const px=Math.cos(a)*.85,pz=Math.sin(a)*.85;
-  makeMesh(new THREE.SphereGeometry(.43,32,24),body,px,0,pz,g);
-  makeMesh(new THREE.TorusGeometry(.29,.045,12,32),
-   mat("#d7e7f8",.13,.8),px,.03,pz,g);
-  bearing(g,px,.04,pz,.19);
- }
- register(g,"Fidget Spinner");
- return g;
-}
-
-function addClicker(x=0,z=-2){
- const g=new THREE.Group();
- g.position.set(x,tableTopY+.13,z);
- const base=shiny(chosenColor);
- const dark=mat("#273348",.2,.5);
- makeMesh(new THREE.BoxGeometry(1.35,.16,.92),dark,0,0,0,g);
- makeMesh(new THREE.BoxGeometry(1.25,.1,.82),base,0,.1,0,g);
- for(let i=0;i<3;i++){
-  const x0=(i-1)*.38;
-  makeMesh(new THREE.CylinderGeometry(.15,.15,.15,32),
-   mat("#dceaff",.15,.7),x0,.22,0,g);
-  makeMesh(new THREE.CylinderGeometry(.105,.105,.16,32),
-   base,x0,.29,0,g);
- }
- makeMesh(new THREE.BoxGeometry(.25,.08,.7),
-  mat("#eaf6ff",.15,.8),.74,.12,0,g);
- register(g,"Mechanical Clicker");
- return g;
-}
-
-function addCube(x=0,z=-2){
- const g=new THREE.Group();
- g.position.set(x,tableTopY+.16,z);
- const colors=[chosenColor,"#f8fbff","#26364c","#69e5ff"];
- for(let i=0;i<4;i++){
-  const block=new THREE.Mesh(
-   new THREE.BoxGeometry(.43,.43,.43),
-   shiny(colors[i%colors.length])
-  );
-  block.position.set((i%2)*.47-.24,0,Math.floor(i/2)*.47-.24);
-  block.rotation.set(.04*(i%2),.04*i,0);
-  block.castShadow=true;
-  block.receiveShadow=true;
-  g.add(block);
-  const edge=new THREE.LineSegments(
-   new THREE.EdgesGeometry(block.geometry),
-   new THREE.LineBasicMaterial({color:"#ffffff",transparent:true,opacity:.7})
-  );
-  block.add(edge);
- }
- register(g,"Infinity Cube");
- return g;
-}
-
-function addCustom(x,z){
- const options=[
-  ()=>addPiece(new THREE.CylinderGeometry(.36,.36,.16,40),x,tableTopY+.13,z,chosenColor,"Round Cap"),
-  ()=>addPiece(new THREE.BoxGeometry(.8,.2,.55),x,tableTopY+.12,z,chosenColor,"Block"),
-  ()=>addPiece(new THREE.TorusGeometry(.32,.1,18,40),x,tableTopY+.19,z,chosenColor,"Ring"),
-  ()=>addPiece(new THREE.SphereGeometry(.32,28,20),x,tableTopY+.32,z,chosenColor,"Orb"),
-  ()=>addPiece(new THREE.BoxGeometry(.95,.12,.22),x,tableTopY+.11,z,chosenColor,"Bar")
- ];
- options[Math.floor(Math.random()*options.length)]();
-}
-
-function updateStatus(){
- document.getElementById("status").textContent=
-  mode.toUpperCase()+" MODE · "+(selectedObject?selectedObject.userData.label:"Choose a part");
-}
-
 function toast(msg){
- const el=document.getElementById("toast");
+ $("toast").textContent=msg;$("toast").style.display="block";
+ clearTimeout(toastTimer);
+ toastTimer=setTimeout(()=>$("toast").style.display="none",2300);
+}
+function log(msg){
+ const el=$("customerInfo");
  el.textContent=msg;
- el.style.opacity=1;
- clearTimeout(toast.timer);
- toast.timer=setTimeout(()=>el.style.opacity=0,1800);
 }
-
-document.querySelectorAll("[data-mode]").forEach(btn=>{
- btn.onclick=()=>{
-  mode=btn.dataset.mode;
-  document.querySelectorAll("[data-mode]").forEach(b=>b.classList.toggle("active",b===btn));
-  updateStatus();
-  toast("Build mode: "+mode);
- };
-});
-
-function findBuildPoint(){
- raycaster.setFromCamera(pointer,camera);
- const hit=new THREE.Vector3();
- if(!raycaster.ray.intersectPlane(buildPlane,hit))return null;
- if(Math.abs(hit.x)>3.35||hit.z< -4.35||hit.z>.35)return null;
- return {x:Math.round(hit.x*2)/2,z:Math.round(hit.z*2)/2};
+function updateStats(){
+ $("money").textContent=Math.floor(money);
+ $("inventory").textContent=designs.reduce((n,d)=>n+(inventory[d.id]||0),0);
+ $("sold").textContent=sold;
+ $("rating").textContent=Math.round(rating);
+ $("revenue").textContent=Math.floor(revenue);
+ $("expenses").textContent=Math.floor(expenses);
+ $("profit").textContent=Math.floor(revenue-expenses);
 }
-
-function build(){
- const p=findBuildPoint();
- if(!p){toast("Aim at the workbench to build");return}
- if(mode==="spinner")addSpinner(p.x,p.z);
- else if(mode==="clicker")addClicker(p.x,p.z);
- else if(mode==="cube")addCube(p.x,p.z);
- else addCustom(p.x,p.z);
- toast("Built "+selectedObject.userData.label+"!");
+function safeText(s){
+ return String(s).replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[c]));
 }
+function refreshPreview(){
+ const d=draft();
+ $("previewTitle").textContent=d.name;
+ $("previewInfo").textContent=typeName(d.type)+" · "+MATERIALS[d.material].name;
+ $("cost").textContent=d.cost;
+ $("suggested").textContent=Math.ceil(d.cost*2.5);
+ if(previewMesh)scene.remove(previewMesh);
+ previewMesh=makeFidget(d,1.15);
+ previewMesh.position.set(0,1.55,-1.65);
+ scene.add(previewMesh);
+ selectedPreview=d;
+}
+["productName","productType","productColor","productMaterial","productDetail"]
+ .forEach(id=>$(id).addEventListener("input",refreshPreview));
+refreshPreview();
 
-function choosePart(){
- raycaster.setFromCamera(pointer,camera);
- const hits=raycaster.intersectObjects(parts,true);
- if(!hits.length)return false;
- let o=hits[0].object;
- while(o.parent&&!o.userData.isToyPart)o=o.parent;
- if(o.userData.isToyPart){
-  selectedObject=o;
-  updateStatus();
-  return true;
+function refreshProducts(){
+ $("designList").innerHTML="";
+ $("retailProduct").innerHTML="";
+ if(!designs.length){
+  $("designList").textContent="Design and manufacture your first fidget!";
+  $("retailProduct").innerHTML='<option value="">No products yet</option>';
+  updateRetail();return;
  }
- return false;
+ for(const d of designs){
+  const el=document.createElement("div");el.className="card";
+  el.innerHTML=`<strong>${safeText(d.name)}</strong>
+  <div class="muted">${typeName(d.type)} · ${MATERIALS[d.material].name}</div>
+  <div class="muted">Workshop inventory: ${inventory[d.id]||0}</div>
+  <div class="muted">Store shelf: ${shelfStock[d.id]||0}</div>`;
+  const btn=document.createElement("button");btn.textContent="Edit this design";
+  btn.onclick=()=>{
+   $("productName").value=d.name;$("productType").value=d.type;
+   $("productColor").value=d.color;$("productMaterial").value=d.material;
+   $("productDetail").value=d.detail;refreshPreview();
+   toast("Design loaded into the studio.");
+  };
+  el.appendChild(btn);$("designList").appendChild(el);
+  const opt=document.createElement("option");
+  opt.value=d.id;opt.textContent=d.name;$("retailProduct").appendChild(opt);
+ }
+ updateRetail();
 }
+function selectedProduct(){
+ return designs.find(d=>d.id===$("retailProduct").value);
+}
+function updateRetail(){
+ const d=selectedProduct();
+ if(!d){$("retailInfo").textContent="Manufacture a product to get started.";return}
+ const price=Math.max(1,Number($("retailPrice").value)||1);
+ $("retailInfo").textContent=
+ `Workshop: ${inventory[d.id]||0} · Shelf: ${shelfStock[d.id]||0} · Cost: $${d.cost} · Margin per sale: $${price-d.cost}`;
+}
+$("retailProduct").addEventListener("change",updateRetail);
+$("retailPrice").addEventListener("input",updateRetail);
 
-canvasRenderer.domElement.addEventListener("click",()=>{
- if(!running)return;
- if(!mouseLocked){
-  canvasRenderer.domElement.requestPointerLock?.();
+function manufacture(d,quantity){
+ const total=d.cost*quantity;
+ if(money<total){toast("Not enough cash for manufacturing materials!");return false}
+ money-=total;expenses+=total;
+ inventory[d.id]=(inventory[d.id]||0)+quantity;
+ d.made=(d.made||0)+quantity;
+ updateStats();refreshProducts();
+ toast(`Manufactured ${quantity} ${d.name}${quantity===1?"":"s"}!`);
+ return true;
+}
+$("manufacture").onclick=()=>{
+ let d=designs.find(x=>x.name===selectedPreview.name&&
+ x.type===selectedPreview.type&&x.color===selectedPreview.color&&
+ x.material===selectedPreview.material&&x.detail===selectedPreview.detail);
+ if(!d){d={...selectedPreview};designs.push(d);inventory[d.id]=0;shelfStock[d.id]=0}
+ manufacture(d,1);
+};
+$("batch").onclick=()=>{
+ let d=designs.find(x=>x.name===selectedPreview.name&&
+ x.type===selectedPreview.type&&x.color===selectedPreview.color&&
+ x.material===selectedPreview.material&&x.detail===selectedPreview.detail);
+ if(!d){d={...selectedPreview};designs.push(d);inventory[d.id]=0;shelfStock[d.id]=0}
+ manufacture(d,5);
+};
+$("previewButton").onclick=()=>{refreshPreview();toast("Preview updated.");};
+
+function stockProduct(quantity){
+ const d=selectedProduct();
+ if(!d){toast("Create a product first.");return}
+ const available=inventory[d.id]||0;
+ if(available<=0){toast("Manufacture some stock first.");return}
+ quantity=Math.min(quantity,available);
+ inventory[d.id]-=quantity;
+ shelfStock[d.id]=(shelfStock[d.id]||0)+quantity;
+ refreshProducts();updateStats();
+ toast(`Placed ${quantity} ${d.name} on the retail shelf.`);
+}
+$("stockOne").onclick=()=>stockProduct(1);
+$("stockAll").onclick=()=>{
+ const d=selectedProduct();
+ if(d)stockProduct(inventory[d.id]||0);
+};
+$("retailPrice").value=25;
+$("storeToggle").onclick=()=>{
+ shopOpen=!shopOpen;
+ $("storeToggle").textContent=shopOpen?"Close the store":"Open the store";
+ $("shopClosed").textContent=shopOpen?"":"Your store is closed. No customers will buy.";
+ toast(shopOpen?"Store opened!":"Store closed.");
+};
+
+// Customers are 3D characters that walk between the entrance,
+// shelves and checkout.
+const customers=[];
+const names=["Alex","Jamie","Taylor","Morgan","Riley","Casey","Jordan","Sam"];
+function makePerson(color){
+ const g=new THREE.Group();
+ const shirt=material(color,.75,0);
+ const skin=material(0xe0b18d,.8,0);
+ const pants=material(0x303b50,.8,0);
+ const shoe=material(0x20232a,.6,.1);
+ function part(geo,m,x,y,z){
+  const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);
+  o.castShadow=true;g.add(o);return o;
+ }
+ part(new THREE.CylinderGeometry(.17,.2,.48,12),shirt,0,1.05,0);
+ part(new THREE.SphereGeometry(.15,16,12),skin,0,1.4,0);
+ part(new THREE.CylinderGeometry(.075,.09,.42,8),pants,-.1,.62,0);
+ part(new THREE.CylinderGeometry(.075,.09,.42,8),pants,.1,.62,0);
+ part(new THREE.BoxGeometry(.13,.09,.25),shoe,-.1,.37,.04);
+ part(new THREE.BoxGeometry(.13,.09,.25),shoe,.1,.37,.04);
+ part(new THREE.CylinderGeometry(.05,.06,.38,8),shirt,-.22,1.05,0);
+ part(new THREE.CylinderGeometry(.05,.06,.38,8),shirt,.22,1.05,0);
+ return g;
+}
+function spawnCustomer(){
+ const colors=[0x4f88d6,0xdb8258,0x9b80d8,0x55b99b,0xd2a44e];
+ const g=makePerson(colors[Math.floor(Math.random()*colors.length)]);
+ g.position.set(5,.02,5);
+ scene.add(g);
+ customers.push({g,phase:"enter",timer:0,target:new THREE.Vector3(1,0,-2.5),name:names[Math.floor(Math.random()*names.length)]});
+}
+function customerStep(c,dt){
+ c.timer+=dt;
+ let target;
+ if(c.phase==="enter")target.set(-3,0,-2.7);
+ else if(c.phase==="browse")target.set(-5,0,-3.2);
+ else if(c.phase==="checkout")target.set(-3.4,0,-2.6);
+ else target.set(5,0,5);
+
+ if(c.phase==="browse"&&c.timer>2.5){
+  c.phase="checkout";c.timer=0;
+ }
+ if(c.phase==="checkout"&&c.timer>2){
+  c.timer=0;
+  const options=designs.filter(d=>(shelfStock[d.id]||0)>0);
+  if(shopOpen&&options.length){
+   const d=options[Math.floor(Math.random()*options.length)];
+   const price=Math.max(1,Number($("retailPrice").value)||25);
+   const fair=d.cost*2.5+(rating-50)*.15;
+   const chance=Math.max(.06,Math.min(.96,.78-(price-fair)/Math.max(15,fair)*.45));
+   if(Math.random()<chance){
+    shelfStock[d.id]--;
+    money+=price;revenue+=price;sold++;
+    rating=Math.min(100,rating+(price<=fair?1:.2));
+    log(`${c.name} bought ${d.name} for $${price}!`);
+   }else{
+    rating=Math.max(0,rating-.15);
+    log(`${c.name} thought ${d.name} was too expensive.`);
+   }
+  }else{
+   log(`${c.name} couldn't find anything to buy.`);
+  }
+  c.phase="leave";
+ }
+ const delta=new THREE.Vector3().subVectors(target,c.g.position);
+ const dist=delta.length();
+ if(dist>.12){
+  delta.normalize();
+  const speed=1.05;
+  c.g.position.addScaledVector(delta,speed*dt);
+  c.g.rotation.y=Math.atan2(delta.x,delta.z);
+  // Gentle walking animation
+  c.g.position.y=.02+Math.abs(Math.sin(c.timer*9))*.035;
+ }else if(c.phase==="enter"){
+  c.phase="browse";c.timer=0;
+ }else if(c.phase==="leave"){
+  scene.remove(c.g);
+  customers.splice(customers.indexOf(c),1);
   return;
  }
- if(!choosePart())build();
-});
-canvasRenderer.domElement.addEventListener("contextmenu",e=>e.preventDefault());
-canvasRenderer.domElement.addEventListener("mousedown",e=>{
- if(!running)return;
- if(e.button===2){
-  if(!choosePart())build();
- }
-});
-document.addEventListener("pointerlockchange",()=>{
- mouseLocked=document.pointerLockElement===canvasRenderer.domElement;
-});
-document.addEventListener("mousemove",e=>{
- if(!mouseLocked)return;
- camera.rotation.order="YXZ";
- camera.rotation.y-=e.movementX*.002;
- camera.rotation.x-=e.movementY*.002;
- camera.rotation.x=Math.max(-1.25,Math.min(1.25,camera.rotation.x));
-});
+ updateStats();
+}
+let spawnTimer=2;
 
+// WASD movement and mouse look
 document.addEventListener("keydown",e=>{
  keys[e.key.toLowerCase()]=true;
- if(e.key.toLowerCase()==="q"&&selectedObject)selectedObject.rotation.y-=Math.PI/12;
- if(e.key.toLowerCase()==="e"&&selectedObject)selectedObject.rotation.y+=Math.PI/12;
- if(e.key.toLowerCase()==="f")build();
- if(e.key==="Escape")mouseLocked=false;
+ if(["w","a","s","d","arrowup","arrowdown","arrowleft","arrowright"].includes(e.key.toLowerCase()))e.preventDefault();
 });
 document.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
-
-document.getElementById("spin").onclick=()=>{
- spinning=!spinning;
- document.getElementById("spin").textContent=spinning?"Ⅱ Stop spinning":"▶ Spin my toy";
- toast(spinning?"Your toys are spinning!":"Stopped spinning");
-};
-document.getElementById("remove").onclick=()=>{
- if(!selectedObject){toast("Select a part first");return}
- scene.remove(selectedObject);
- const i=parts.indexOf(selectedObject);
- if(i>=0)parts.splice(i,1);
- selectedObject=parts[parts.length-1]||null;
- updateStatus();
- toast("Part removed");
-};
-document.getElementById("clear").onclick=()=>{
- parts.forEach(p=>scene.remove(p));
- parts.length=0;
- selectedObject=null;
- updateStatus();
- toast("Workbench cleared");
-};
-document.getElementById("save").onclick=()=>{
- const data=parts.map(p=>({
-  label:p.userData.label,
-  position:p.position.toArray(),
-  rotation:p.rotation.toArray(),
-  color:chosenColor
- }));
- const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
- const a=document.createElement("a");
- a.href=URL.createObjectURL(blob);
- a.download="my-fidget-design.json";
- a.click();
- URL.revokeObjectURL(a.href);
- toast("Design saved as JSON");
-};
-
-let running=false;
-document.getElementById("play").onclick=()=>{
- running=true;
- document.getElementById("overlay").style.display="none";
- canvasRenderer.domElement.requestPointerLock?.();
- toast("Welcome to Fidget Lab!");
-};
-
-// Mobile movement buttons
-function hold(id,k){
- const el=document.getElementById(id);
- el.addEventListener("pointerdown",e=>{e.preventDefault();keys[k]=true});
- ["pointerup","pointercancel","pointerleave"].forEach(ev=>
-  el.addEventListener(ev,()=>keys[k]=false));
-}
-hold("mf","w");hold("mb","s");hold("ml","a");hold("mr","d");
-
-function animate(now)
-
- if(spinning){
-  parts.forEach(p=>p.rotation.y+=.045*dt);
- }
- canvasRenderer.render(scene,camera);
-}
-requestAnimationFrame(animate);
-
-addEventListener("resize",()=>{
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- canvasRenderer.setSize(innerWidth,innerHeight);
+renderer.domElement.addEventListener("click",()=>{
+ if(!locked)renderer.domElement.requestPointerLock();
+});
+document.addEventListener("pointerlockchange",()=>{
+ locked=document.pointerLockElement===renderer.domElement;
+});
+document.addEventListener("mousemove",e=>{
+ if(!locked)return;
+ yaw-=e.movementX*.002;
+ pitch-=e.movementY*.002;
+ pitch=Math.max(-1.2,Math.min(1.2,pitch));
+ camera.rotation.y=yaw;camera.rotation.x=pitch;
 });
 
-// Place a few sample toys on the workbench
-addSpinner(-1.3,-2.2);
-addClicker(1.1,-2.3);
-selectedObject=null;
-updateStatus();
+$("save").onclick=()=>{
+ const data={money,revenue,expenses,sold,rating,designs,inventory,shelfStock,shopOpen,nextId};
+ try{
+  localStorage.setItem("fidgetLab3DSave",JSON.stringify(data));
+  toast("Game saved in this browser!");
+ }catch(e){toast("Unable to save game in this browser.");}
+};
+$("load").onclick=()=>{
+ try{
+  const data=JSON.parse(localStorage.getItem("fidgetLab3DSave"));
+  if(!data){toast("No save found.");return}
+  money=data.money??750;revenue=data.revenue??0;expenses=data.expenses??0;
+  sold=data.sold??0;rating=data.rating??50;designs=data.designs||[];
+  inventory=data.inventory||{};shelfStock=data.shelfStock||{};
+  shopOpen=data.shopOpen??true;nextId=data.nextId||1;
+  $("storeToggle").textContent=shopOpen?"Close the store":"Open the store";
+  $("shopClosed").textContent=shopOpen?"":"Your store is closed. No customers will buy.";
+  refreshProducts();updateStats();toast("Saved game loaded!");
+ }catch(e){toast("The save could not be loaded.");}
+};
+$("reset").onclick=()=>{
+ if(!confirm("Reset your entire business? This deletes your local save."))return;
+ localStorage.removeItem("fidgetLab3DSave");
+ money=750;revenue=0;expenses=0;sold=0;rating=50;
+ designs=[];inventory={};shelfStock={};nextId=1;
+ refreshProducts();updateStats();toast("New business started!");
+};
+
+// Main game loop
+const clock=new THREE.Clock();
+function animate(){
+ requestAnimationFrame(animate);
+ const dt=Math.min(clock.getDelta(),.05);
+ const forward=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0);
+ const side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);
+ const speed=4*dt;
+ camera.position.x+=(-Math.sin(yaw)*forward+Math.cos(yaw)*side)*speed;
+ camera.position.z+=(-Math.cos(yaw)*forward-Math.sin(yaw)*side)*speed;
+ camera.position.x=Math.max(-8,Math.min(8,camera.position.x));
+ camera.position.z=Math.max(-4.8,Math.min(8,camera.position.z));
+ camera.position.y=1.7;
+
+ if(previewMesh){
+  previewMesh.rotation.y+=dt*.7;
+  previewMesh.position.y=1.55+Math.sin(performance.now()*.0015)*.035;
+ }
+ for(const d of designs){
+  // Display one sample of each design on the shop shelves.
+  if(!d.displayMesh){
+   const sample=makeFidget(d,.35);
+   sample.position.set(-6.5+(designs.indexOf(d)%5)*.65,1.3,-3.3);
+   scene.add(sample);d.displayMesh=true;
+   d._sample=sample;
+  }
+  if(d._sample)d._sample.rotation.y+=dt*.25;
+ }
+ spawnTimer-=dt;
+ if(spawnTimer<=0&&shopOpen&&customers.length<5){
+  spawnCustomer();spawnTimer=7+Math.random()*6;
+ }
+ for(let i=customers.length-1;i>=0;i--)customerStep(customers[i],dt);
+ renderer.render(scene,camera);
+}
+refreshProducts();updateStats();animate();
+
+window.addEventListener("resize",()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+});
 })();
 </script>
 </body>
