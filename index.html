@@ -1,548 +1,471 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Minecraft SkyBlock</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkyBlock Quest</title>
 <style>
-* {
-  box-sizing: border-box;
-  image-rendering: pixelated;
-}
-
-body {
-  margin: 0;
-  overflow-x: hidden;
-  background: #111a2b;
-  font-family: monospace;
-  color: white;
-}
-
-.scene {
-  position: relative;
-  min-height: 100vh;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(
-    #4b9cde 0%,
-    #a9e0f7 48%,
-    #64b6e8 70%,
-    #315b87 100%
-  );
-}
-
-.sun {
-  position: absolute;
-  width: 90px;
-  height: 90px;
-  background: #fff6b0;
-  top: 9%;
-  right: 14%;
-  box-shadow: 0 0 65px #fff6a0;
-}
-
-.cloud {
-  position: absolute;
-  height: 22px;
-  width: 125px;
-  background: #fff;
-  opacity: .85;
-  box-shadow: 25px -20px #fff, 55px -10px #fff;
-}
-
-.cloud.one {
-  top: 17%;
-  left: 8%;
-}
-
-.cloud.two {
-  top: 29%;
-  right: 12%;
-  transform: scale(.7);
-}
-
-.island {
-  position: absolute;
-  bottom: 0;
-  height: 28%;
-  width: 120%;
-  left: -10%;
-  background: #4a9a43;
-  border-top: 18px solid #7acb54;
-  box-shadow: 0 45px #795438, 0 90px #49392e;
-  transform: perspective(300px) rotateX(5deg);
-}
-
-.island:before {
-  content: "";
-  position: absolute;
-  height: 80px;
-  width: 100%;
-  top: 18px;
-  background: repeating-linear-gradient(
-    90deg,
-    transparent 0 70px,
-    #0000000c 70px 90px
-  );
-}
-
-.waterfall {
-  position: absolute;
-  width: 35px;
-  height: 160px;
-  background: repeating-linear-gradient(
-    0deg, #56d6f5 0 15px, #a2efff 15px 25px
-  );
-  bottom: 13%;
-  left: 18%;
-}
-
-.waterfall.two {
-  left: auto;
-  right: 17%;
-  height: 115px;
-}
-
-.tree {
-  position: absolute;
-  bottom: 29%;
-  left: 12%;
-  width: 25px;
-  height: 95px;
-  background: #79502f;
-}
-
-.tree:before {
-  content: "";
-  position: absolute;
-  width: 100px;
-  height: 75px;
-  background: #287d3c;
-  left: -38px;
-  top: -55px;
-  box-shadow: 15px -25px #389d49, -15px 12px #43ad4d;
-}
-
-.tree.right {
-  left: auto;
-  right: 13%;
-  transform: scale(.8);
-}
-
-.title {
-  position: absolute;
-  top: 5%;
-  left: 0;
-  width: 100%;
-  text-align: center;
-  font-size: clamp(24px, 5vw, 54px);
-  font-weight: 900;
-  color: #fff;
-  text-shadow: 4px 4px #263b5a, 7px 7px #18273d;
-  letter-spacing: 3px;
-}
-
-.subtitle {
-  position: absolute;
-  top: calc(5% + 60px);
-  width: 100%;
-  text-align: center;
-  color: #fff6a6;
-  font-weight: bold;
-  text-shadow: 2px 2px #263b5a;
-  letter-spacing: 4px;
-}
-
-.character {
-  position: relative;
-  z-index: 5;
-  width: 200px;
-  height: 400px;
-  margin-top: 35px;
-  filter: drop-shadow(12px 14px 0 #1a2b3a66);
-}
-
-/* BLOCK HEAD */
-.head {
-  position: absolute;
-  top: 0;
-  left: 40px;
-  width: 120px;
-  height: 120px;
-  background: #e6b38c;
-  box-shadow: inset -12px -8px #c9916b;
-  z-index: 4;
-}
-
-/* HAIR */
-.hair {
-  position: absolute;
-  left: 40px;
-  top: -8px;
-  width: 120px;
-  height: 40px;
-  background: #493024;
-  z-index: 6;
-}
-
-.hair:before {
-  content: "";
-  position: absolute;
-  left: -4px;
-  top: 20px;
-  width: 25px;
-  height: 40px;
-  background: #493024;
-  box-shadow: 25px 10px #493024, 55px 2px #493024;
-}
-
-.hair:after {
-  content: "";
-  position: absolute;
-  right: -3px;
-  top: 24px;
-  width: 20px;
-  height: 42px;
-  background: #493024;
-}
-
-/* GREEN EYES */
-.eye {
-  position: absolute;
-  top: 57px;
-  left: 16px;
-  width: 25px;
-  height: 13px;
-  background: #fff;
-  box-shadow: 65px 0 #fff;
-}
-
-.eye:after {
-  content: "";
-  position: absolute;
-  left: 9px;
-  width: 12px;
-  height: 13px;
-  background: #32d35b;
-  box-shadow: 65px 0 #32d35b;
-}
-
-.nose {
-  position: absolute;
-  top: 72px;
-  left: 55px;
-  width: 12px;
-  height: 15px;
-  background: #c9916b;
-}
-
-.mouth {
-  position: absolute;
-  top: 94px;
-  left: 42px;
-  width: 38px;
-  height: 7px;
-  background: #8b4539;
-}
-
-/* WHITE SHIRT AND NAVY SUIT */
-.torso {
-  position: absolute;
-  top: 120px;
-  left: 35px;
-  width: 130px;
-  height: 145px;
-  background: #142e57;
-  box-shadow: inset -15px 0 #0c2141;
-}
-
-.shirt {
-  position: absolute;
-  top: 0;
-  left: 43px;
-  width: 43px;
-  height: 125px;
-  background: #fff;
-  clip-path: polygon(0 0, 100% 0, 70% 100%, 30% 100%);
-}
-
-.tie {
-  position: absolute;
-  top: 8px;
-  left: 57px;
-  width: 19px;
-  height: 95px;
-  background: #d92535;
-  clip-path: polygon(20% 0, 80% 0, 100% 18%, 60% 100%, 0 18%);
-}
-
-.tie:before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 17px;
-  background: #a91024;
-}
-
-.lapel {
-  position: absolute;
-  top: 0;
-  left: 22px;
-  width: 30px;
-  height: 75px;
-  background: #244573;
-  clip-path: polygon(0 0, 100% 0, 100% 100%);
-}
-
-.lapel.right {
-  left: 78px;
-  transform: scaleX(-1);
-}
-
-/* SUIT ARMS */
-.arm {
-  position: absolute;
-  top: 125px;
-  width: 35px;
-  height: 115px;
-  background: #18375f;
-}
-
-.arm.left {
-  left: 0;
-}
-
-.arm.right {
-  right: 0;
-  background: #102748;
-}
-
-.hand {
-  position: absolute;
-  bottom: -22px;
-  left: 3px;
-  width: 29px;
-  height: 25px;
-  background: #e6b38c;
-}
-
-/* TROUSERS */
-.legs {
-  position: absolute;
-  top: 265px;
-  left: 42px;
-  width: 116px;
-  height: 100px;
-  background: #172d4c;
-}
-
-.legs:after {
-  content: "";
-  position: absolute;
-  left: 55px;
-  width: 7px;
-  height: 100%;
-  background: #0d203a;
-}
-
-/* BLACK SHOES */
-.shoe {
-  position: absolute;
-  top: 355px;
-  left: 32px;
-  width: 63px;
-  height: 28px;
-  background: #101116;
-  box-shadow: inset 0 -7px #292a31;
-}
-
-.shoe.right {
-  left: 105px;
-}
-
-.platform {
-  position: absolute;
-  bottom: 16%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 320px;
-  height: 35px;
-  background: #8d939c;
-  border-top: 10px solid #c2c9d0;
-  box-shadow: 0 20px #626c79;
-}
-
-/* GAME HUD */
-.hud {
-  position: fixed;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(96%, 560px);
-  z-index: 10;
-  text-align: center;
-  text-shadow: 2px 2px #000;
-}
-
-.stats {
-  font-size: 18px;
-  margin-bottom: 6px;
-  letter-spacing: 3px;
-}
-
-.xp {
-  width: 100%;
-  height: 7px;
-  background: #222;
-  border: 1px solid #111;
-  margin-bottom: 5px;
-}
-
-.xp span {
-  display: block;
-  width: 72%;
-  height: 100%;
-  background: #65ef35;
-}
-
-.level {
-  position: absolute;
-  right: 8%;
-  top: -30px;
-  color: #80ff51;
-  font-weight: bold;
-  font-size: 20px;
-}
-
-.hotbar {
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  gap: 3px;
-  padding: 5px;
-  background: #25252bd9;
-  border: 3px solid #777984;
-  outline: 2px solid #222;
-}
-
-.slot {
-  aspect-ratio: 1;
-  background: #444650;
-  border: 2px solid #777984;
-  box-shadow: inset 2px 2px #292a31;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: clamp(17px, 4vw, 29px);
-  position: relative;
-}
-
-.slot.selected {
-  border: 3px solid white;
-  background: #777984;
-}
-
-.slot small {
-  position: absolute;
-  bottom: 1px;
-  right: 3px;
-  font-size: 10px;
-  color: white;
-}
-
-@media (max-width: 500px) {
-  .character {
-    transform: scale(.78);
-  }
-
-  .platform {
-    width: 250px;
-  }
-
-  .title {
-    top: 8%;
-  }
-
-  .subtitle {
-    top: calc(8% + 42px);
-  }
-}
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;background:#111827;color:white;font-family:monospace}
+canvas{display:block;width:100vw;height:100vh}
+#hud{position:fixed;inset:10px 10px auto;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
+.panel{background:#111827dd;border:2px solid #8494ad;padding:10px;line-height:1.6}
+#info{min-width:155px}
+#title{position:fixed;top:12px;left:50%;transform:translateX(-50%);font-size:clamp(17px,3vw,30px);color:#ffe45b;text-shadow:3px 3px #26334a;text-align:center}
+#bottom{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);width:min(500px,95vw);text-align:center}
+#stats{font-size:15px;text-shadow:2px 2px #000;margin-bottom:5px}
+#bar{display:flex;justify-content:center;gap:3px;background:#252b38dd;border:3px solid #a0a5ad;padding:4px}
+.slot{width:clamp(30px,6vw,46px);aspect-ratio:1;display:grid;place-items:center;background:#414958;border:2px solid #777;font-size:clamp(17px,3vw,25px);cursor:pointer}
+.slot.active{border:3px solid white;background:#75859c}
+#message{position:fixed;top:22%;left:50%;transform:translateX(-50%);font-size:clamp(14px,2.5vw,22px);text-align:center;color:#fff5a0;text-shadow:2px 2px #182039;pointer-events:none;width:90%}
+#help{position:fixed;left:10px;bottom:100px;background:#111827dd;border:2px solid #8494ad;padding:8px;font-size:12px;line-height:1.6}
+#start{position:fixed;inset:0;background:#07111edb;display:grid;place-items:center;text-align:center;padding:20px}
+#card{max-width:450px;background:#17263b;border:3px solid #9bb4d1;padding:24px;box-shadow:8px 8px #0006}
+h1{color:#ffe45b}
+button{background:#287a49;color:white;border:2px solid #a3f5b9;padding:12px 22px;font:bold 18px monospace;cursor:pointer}
+@media(max-width:600px){#help{font-size:10px;bottom:95px}#info{font-size:11px;padding:6px}}
 </style>
 </head>
-
 <body>
+<canvas id="game"></canvas>
 
-<div class="scene">
+<div id="title">HYPIXEL SKYBLOCK</div>
 
-  <div class="sun"></div>
-  <div class="cloud one"></div>
-  <div class="cloud two"></div>
-
-  <div class="title">HYPIXEL SKYBLOCK</div>
-  <div class="subtitle">ADVENTURE AWAITS</div>
-
-  <div class="island"></div>
-  <div class="waterfall"></div>
-  <div class="waterfall two"></div>
-  <div class="tree"></div>
-  <div class="tree right"></div>
-
-  <div class="platform"></div>
-
-  <div class="character">
-
-    <div class="head">
-      <div class="eye"></div>
-      <div class="nose"></div>
-      <div class="mouth"></div>
-    </div>
-
-    <div class="hair"></div>
-
-    <div class="torso">
-      <div class="shirt"></div>
-      <div class="tie"></div>
-      <div class="lapel"></div>
-      <div class="lapel right"></div>
-    </div>
-
-    <div class="arm left">
-      <div class="hand"></div>
-    </div>
-
-    <div class="arm right">
-      <div class="hand"></div>
-    </div>
-
-    <div class="legs"></div>
-    <div class="shoe"></div>
-    <div class="shoe right"></div>
-
+<div id="hud">
+  <div class="panel">
+    <b style="color:#9cffb0">CONTROLS</b><br>
+    WASD / Arrows: Move<br>
+    Space: Jump<br>
+    E: Collect crystal
   </div>
-
-  <div class="hud">
-    <div class="stats">❤ ❤ ❤ ❤ ❤</div>
-    <div class="level">281</div>
-    <div class="xp"><span></span></div>
-
-    <div class="hotbar">
-      <div class="slot selected">⚔️</div>
-      <div class="slot">🗡️</div>
-      <div class="slot">✨</div>
-      <div class="slot">🏹</div>
-      <div class="slot">🪄</div>
-      <div class="slot">💎</div>
-      <div class="slot">🍎</div>
-      <div class="slot">🧪</div>
-      <div class="slot">🟩</div>
-    </div>
+  <div id="info" class="panel">
+    <b style="color:#ffe45b">SKYBLOCK</b><br>
+    Location: Village<br>
+    Coins: <span id="coins">0</span><br>
+    Crystals: <span id="crystals">0 / 5</span><br>
+    Health: <span id="health">10 / 10</span><br>
+    Quest: <span id="quest">Find crystals</span>
   </div>
-
 </div>
 
+<div id="message">Collect 5 crystals to unlock the portal!</div>
+<div id="help">Explore the island.<br>Avoid the slimes.<br>Collect 5 crystals to win!</div>
+
+<div id="bottom">
+  <div id="stats">
+    <span id="hearts" style="color:#ff6666">♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥</span>
+    <span style="color:#83ff9a"> LVL 281</span>
+  </div>
+  <div id="bar"></div>
+</div>
+
+<div id="start">
+  <div id="card">
+    <h1 id="startTitle">SKYBLOCK QUEST</h1>
+    <p id="startText">Explore the floating island, collect magical crystals, avoid slimes, and unlock the portal!</p>
+    <p>Move with WASD or arrow keys. Press E near crystals to collect them.</p>
+    <button id="play">PLAY GAME</button>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let W, H;
+function resize(){
+  W = canvas.width = innerWidth;
+  H = canvas.height = innerHeight;
+}
+addEventListener("resize", resize);
+resize();
+
+const keys = {};
+let running = false;
+let won = false;
+let tick = 0;
+let messageTimer = 0;
+
+const player = {
+  x: 0, y: 0, z: 0, vz: 0,
+  coins: 0, crystals: 0, hp: 10
+};
+
+const portal = {x: 0, y: -340};
+const crystals = [];
+const slimes = [];
+const trees = [];
+const clouds = [];
+
+function rand(a,b){return a+Math.random()*(b-a)}
+
+for(let i=0;i<14;i++){
+  crystals.push({
+    x:rand(-700,700),
+    y:rand(-480,480),
+    got:false,
+    phase:rand(0,6)
+  });
+}
+for(let i=0;i<7;i++){
+  slimes.push({
+    x:rand(-550,550), y:rand(-400,400),
+    vx:rand(-1,1), vy:rand(-1,1),
+    lastHit:0, phase:rand(0,6)
+  });
+}
+for(let i=0;i<30;i++){
+  trees.push({
+    x:rand(-900,900),y:rand(-600,600),
+    size:rand(.65,1.25)
+  });
+}
+for(let i=0;i<8;i++){
+  clouds.push({x:rand(0,innerWidth),y:rand(30,innerHeight*.4),s:rand(.6,1.5)});
+}
+
+const items=["⚔️","🪄","✨","🏹","💎","🔮","🧪","🟪","⭐"];
+const bar=document.getElementById("bar");
+items.forEach((item,i)=>{
+  const slot=document.createElement("div");
+  slot.className="slot"+(i===0?" active":"");
+  slot.textContent=item;
+  slot.title="Slot "+(i+1);
+  slot.onclick=()=>{
+    document.querySelectorAll(".slot").forEach((s,j)=>{
+      s.classList.toggle("active",i===j);
+    });
+  };
+  bar.appendChild(slot);
+});
+
+function say(text){
+  document.getElementById("message").textContent=text;
+  messageTimer=180;
+}
+
+addEventListener("keydown",e=>{
+  const k=e.key.toLowerCase();
+  keys[k]=true;
+
+  if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(k)){
+    e.preventDefault();
+  }
+
+  if(!e.repeat && k===" " && player.z===0) player.vz=8;
+  if(!e.repeat && k==="e") collect();
+});
+addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+
+document.getElementById("play").onclick=()=>{
+  if(won){
+    location.reload();
+    return;
+  }
+  running=true;
+  document.getElementById("start").style.display="none";
+  say("Find 5 crystals. Avoid the slimes!");
+};
+
+function collect(){
+  if(!running||won)return;
+
+  const c=crystals.find(c=>!c.got&&
+    Math.hypot(c.x-player.x,c.y-player.y)<55);
+
+  if(c){
+    c.got=true;
+    player.crystals++;
+    player.coins+=25;
+    say("Crystal collected! +25 coins!");
+
+    if(player.crystals>=5){
+      say("Quest complete! Go to the portal!");
+    }
+    updateHUD();
+  }else{
+    say("Move closer to a glowing crystal!");
+  }
+}
+
+function updateHUD(){
+  document.getElementById("coins").textContent=player.coins;
+  document.getElementById("crystals").textContent=player.crystals+" / 5";
+  document.getElementById("health").textContent=player.hp+" / 10";
+  document.getElementById("hearts").textContent=
+    "♥ ".repeat(player.hp)+"♡ ".repeat(10-player.hp);
+  document.getElementById("quest").textContent=
+    player.crystals>=5?"Portal unlocked!":"Find crystals";
+}
+
+function project(x,y,z=0){
+  return {
+    x:W/2+(x-player.x)*.78,
+    y:H*.52+(y-player.y)*.46-z
+  };
+}
+
+function rect(x,y,w,h,color){
+  ctx.fillStyle=color;
+  ctx.fillRect(Math.round(x),Math.round(y),w,h);
+}
+
+function polygon(points,color,stroke){
+  ctx.beginPath();
+  points.forEach((p,i)=>{
+    if(i===0)ctx.moveTo(p[0],p[1]);
+    else ctx.lineTo(p[0],p[1]);
+  });
+  ctx.closePath();
+  ctx.fillStyle=color;
+  ctx.fill();
+  if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}
+}
+
+function drawBackground(){
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,"#4b9de4");
+  g.addColorStop(.58,"#b5e7fb");
+  g.addColorStop(1,"#6eacd0");
+  ctx.fillStyle=g;
+  ctx.fillRect(0,0,W,H);
+
+  // Sun
+  rect(W*.78,H*.1,55,55,"#fff4a3");
+
+  // Clouds
+  clouds.forEach(c=>{
+    c.x-=.15;
+    if(c.x<-150)c.x=W+100;
+    rect(c.x,c.y,75*c.s,16*c.s,"#ffffffaa");
+    rect(c.x+20*c.s,c.y-12*c.s,45*c.s,15*c.s,"#ffffffaa");
+  });
+
+  // Floating islands in the distance
+  for(let i=0;i<7;i++){
+    const x=((i*197+80)%W);
+    const y=H*.22+(i%3)*45;
+    polygon([[x-45,y],[x+45,y],[x+28,y+25],[x,y+75],[x-24,y+25]],"#56865a");
+    rect(x-38,y-8,76,10,"#6bc95d");
+    rect(x-23,y+15,46,8,"#6b5038");
+  }
+
+  // Main island
+  polygon([
+    [W*.5,H*.38],[W*1.3,H*.68],
+    [W*1.15,H*1.05],[W*-.15,H*1.05],
+    [W*-.3,H*.68]
+  ],"#4d9b49");
+
+  polygon([
+    [W*.5,H*.38],[W*1.3,H*.68],
+    [W*1.15,H*.73],[W*-.15,H*.73],
+    [W*-.3,H*.68]
+  ],"#7cc95b");
+
+  // Stone path
+  for(let i=0;i<15;i++){
+    const x=W*.5+(i-7)*37;
+    const y=H*.74+Math.abs(i-7)*5;
+    rect(x,y,32,15,i%2?"#9ca5ad":"#c0c6cc");
+    rect(x+3,y+3,7,3,"#e1e4e7");
+  }
+}
+
+function drawTree(o){
+  const p=project(o.x,o.y);
+  const s=o.size;
+  rect(p.x-5*s,p.y-22*s,10*s,25*s,"#79502e");
+  rect(p.x-22*s,p.y-50*s,44*s,32*s,"#247541");
+  rect(p.x-17*s,p.y-66*s,34*s,24*s,"#31964b");
+  rect(p.x-9*s,p.y-78*s,18*s,18*s,"#43a852");
+}
+
+function drawPortal(){
+  const p=project(portal.x,portal.y);
+  rect(p.x-42,p.y-52,84,64,"#7d8998");
+  rect(p.x-33,p.y-45,66,54,"#351c82");
+
+  for(let i=0;i<7;i++){
+    rect(p.x-28+i*9,p.y-40+(i%2)*5,5,43,
+      ["#772de0","#a64bff","#5c4bff"][i%3]);
+  }
+
+  rect(p.x-47,p.y+9,94,8,"#c4ccd7");
+  ctx.textAlign="center";
+  ctx.font="bold 12px monospace";
+  ctx.fillStyle="#fff16c";
+  ctx.fillText(
+    player.crystals>=5?"PORTAL OPEN":"NEED 5 CRYSTALS",
+    p.x,p.y-60
+  );
+  ctx.textAlign="left";
+}
+
+function drawCrystal(c){
+  if(c.got)return;
+  const p=project(c.x,c.y,Math.sin(tick*.07+c.phase)*7+10);
+
+  ctx.fillStyle="#55f4ff44";
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,20,0,Math.PI*2);
+  ctx.fill();
+
+  polygon([
+    [p.x,p.y-14],[p.x+10,p.y],
+    [p.x,p.y+14],[p.x-10,p.y]
+  ],"#55f4ff","#e8ffff");
+
+  polygon([
+    [p.x,p.y-8],[p.x+3,p.y],
+    [p.x,p.y+8],[p.x-3,p.y]
+  ],"#e3ffff");
+}
+
+function drawSlime(s){
+  const p=project(s.x,s.y,Math.abs(Math.sin(tick*.09+s.phase))*5);
+  rect(p.x-13,p.y-9,26,18,"#36c96c");
+  rect(p.x-9,p.y-15,18,8,"#43e17c");
+  rect(p.x-7,p.y-3,4,4,"#173b31");
+  rect(p.x+4,p.y-3,4,4,"#173b31");
+}
+
+function drawPlayer(){
+  const p=project(player.x,player.y,player.z);
+  const bob=Math.sin(tick*.15)*1.5;
+
+  // Shadow
+  ctx.fillStyle="#0004";
+  ctx.beginPath();
+  ctx.ellipse(p.x,p.y+5,19,7,0,0,Math.PI*2);
+  ctx.fill();
+
+  // Legs and black shoes
+  rect(p.x-12,p.y-27+bob,10,25,"#142b4c");
+  rect(p.x+2,p.y-27+bob,10,25,"#142b4c");
+  rect(p.x-14,p.y-4,13,7,"#11131a");
+  rect(p.x+1,p.y-4,13,7,"#11131a");
+
+  // Navy suit and white shirt
+  rect(p.x-16,p.y-61+bob,32,36,"#142f59");
+  rect(p.x-6,p.y-60+bob,12,29,"#f5f3ef");
+  rect(p.x-3,p.y-58+bob,6,25,"#d51e32");
+
+  // Arms
+  rect(p.x-20,p.y-56+bob,6,28,"#193b6c");
+  rect(p.x+14,p.y-56+bob,6,28,"#10274b");
+  rect(p.x-20,p.y-30+bob,6,7,"#e9b58d");
+  rect(p.x+14,p.y-30+bob,6,7,"#e9b58d");
+
+  // Head
+  rect(p.x-14,p.y-87+bob,28,27,"#e7b28a");
+
+  // Dark brown hair
+  rect(p.x-16,p.y-92+bob,32,12,"#38251e");
+  rect(p.x-16,p.y-85+bob,7,12,"#38251e");
+  rect(p.x+9,p.y-85+bob,7,11,"#38251e");
+
+  // Green eyes
+  rect(p.x-8,p.y-77+bob,6,5,"#32df55");
+  rect(p.x+4,p.y-77+bob,6,5,"#32df55");
+}
+
+function update(){
+  if(!running||won)return;
+
+  let dx=0,dy=0;
+  if(keys.a||keys.arrowleft)dx--;
+  if(keys.d||keys.arrowright)dx++;
+  if(keys.w||keys.arrowup)dy--;
+  if(keys.s||keys.arrowdown)dy++;
+
+  if(dx||dy){
+    const len=Math.hypot(dx,dy);
+    player.x+=dx/len*3.2;
+    player.y+=dy/len*3.2;
+  }
+
+  player.x=Math.max(-950,Math.min(950,player.x));
+  player.y=Math.max(-680,Math.min(680,player.y));
+
+  player.z+=player.vz||0;
+  if(player.vz!==undefined){
+    player.vz-=.45;
+    if(player.z<0){player.z=0;player.vz=0}
+  }
+
+  for(const s of slimes){
+    s.x+=s.vx;
+    s.y+=s.vy;
+
+    if(Math.random()<.015){
+      s.vx=rand(-1.4,1.4);
+      s.vy=rand(-1.4,1.4);
+    }
+
+    if(Math.hypot(s.x-player.x,s.y-player.y)<25&&player.z<5){
+      if(tick-s.lastHit>70){
+        s.lastHit=tick;
+        player.hp--;
+
+        if(player.hp<=0){
+          player.hp=10;
+          player.x=0;
+          player.y=0;
+          player.coins=Math.max(0,player.coins-20);
+          say("Respawned! You lost 20 coins.");
+        }else{
+          say("Ouch! A slime bumped you!");
+        }
+        updateHUD();
+      }
+    }
+  }
+
+  // Win by reaching the portal after collecting 5 crystals
+  if(player.crystals>=5&&
+     Math.hypot(player.x-portal.x,player.y-portal.y)<60){
+    won=true;
+    document.getElementById("start").style.display="grid";
+    document.getElementById("startTitle").textContent="QUEST COMPLETE!";
+    document.getElementById("startText").textContent=
+      "You collected 5 crystals and unlocked the portal. Great work!";
+    document.getElementById("play").textContent="PLAY AGAIN";
+  }
+}
+
+function draw(){
+  tick++;
+  drawBackground();
+
+  const objects=[];
+  trees.forEach(o=>objects.push({y:o.y,fn:()=>drawTree(o)}));
+  crystals.forEach(o=>objects.push({y:o.y,fn:()=>drawCrystal(o)}));
+  slimes.forEach(o=>objects.push({y:o.y,fn:()=>drawSlime(o)}));
+  objects.push({y:portal.y,fn:drawPortal});
+  objects.push({y:player.y,fn:drawPlayer});
+
+  objects.sort((a,b)=>a.y-b.y);
+  objects.forEach(o=>o.fn());
+
+  if(messageTimer>0)messageTimer--;
+  else{
+    document.getElementById("message").textContent=
+      player.crystals>=5
+      ?"Portal unlocked! Walk into it to win!"
+      :"Find glowing crystals and press E to collect them!";
+  }
+}
+
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+updateHUD();
+loop();
+</script>
 </body>
 </html>
