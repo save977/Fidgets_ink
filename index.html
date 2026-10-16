@@ -3,449 +3,551 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Minecraft SkyBlock</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fidget Lab 3D</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#87ceeb;font-family:monospace;color:white}
-canvas{display:block;width:100vw;height:100vh;image-rendering:pixelated}
-#top{position:fixed;top:12px;left:12px;text-shadow:2px 2px #222;pointer-events:none}
-#title{font-size:22px;color:#ffe66b;font-weight:bold}
-#stats{margin-top:8px;line-height:1.6}
-#crosshair{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font:bold 28px monospace;text-shadow:2px 2px #222;pointer-events:none}
-#hotbar{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);display:flex;gap:3px;background:#2229;padding:5px;border:3px solid #555;max-width:96vw}
-.slot{width:48px;height:48px;background:#777a;border:3px solid #444;display:grid;place-items:center;font-size:27px;position:relative;cursor:pointer}
-.slot.selected{border-color:white;background:#aaa9}
-.num{position:absolute;top:0;left:3px;font-size:11px;color:white;text-shadow:1px 1px black}
-#help{position:fixed;right:12px;top:12px;background:#17202bcc;border:2px solid #aaa;padding:10px;line-height:1.7;font-size:12px}
-#notice{position:fixed;top:27%;left:50%;transform:translateX(-50%);text-align:center;font-size:17px;text-shadow:2px 2px #222}
-#overlay{position:fixed;inset:0;background:#101923cc;display:grid;place-items:center;text-align:center}
-#box{padding:25px;background:#354b35;border:5px solid #c6c6c6;box-shadow:0 0 0 5px #333;max-width:450px}
-h1{color:#7dff69;text-shadow:3px 3px #203020}
-button{padding:12px 24px;background:#668f45;border:3px solid #c5e8a8;color:white;font:bold 18px monospace;cursor:pointer}
-#mobile{display:none;position:fixed;bottom:90px;left:15px;gap:5px}
-#mobile button{padding:10px 15px;font-size:20px}
-@media(max-width:650px){#help{font-size:10px;right:5px;top:5px}#title{font-size:16px}.slot{width:36px;height:38px;font-size:21px}#mobile{display:flex;flex-direction:column}}
+body{margin:0;overflow:hidden;background:#101522;color:white;font-family:Arial,sans-serif}
+canvas{display:block}
+#ui{position:fixed;inset:0;pointer-events:none}
+.panel{pointer-events:auto;background:rgba(17,23,39,.91);border:1px solid #53617d;border-radius:12px;backdrop-filter:blur(12px);box-shadow:0 8px 35px #0005}
+#brand{position:absolute;top:18px;left:18px;padding:13px 17px}
+#brand strong{font-size:20px;letter-spacing:2px;color:#70e9ff}
+#brand small{display:block;color:#b3bed3;margin-top:5px}
+#tools{position:absolute;top:18px;right:18px;width:205px;padding:14px}
+h3{font-size:12px;letter-spacing:2px;color:#8cecff;margin:0 0 10px}
+button{cursor:pointer;color:white;background:#283650;border:1px solid #536887;border-radius:7px;padding:10px;font-weight:bold;transition:.15s}
+button:hover{background:#3e5578;transform:translateY(-1px)}
+button.active{background:#146d86;border-color:#72edff;box-shadow:0 0 12px #38d9ff45}
+#tools button{width:100%;margin-bottom:6px;text-align:left}
+#tools button span{float:right;color:#8cecff}
+#bottom{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);width:min(600px,94vw);padding:12px}
+#bottom h3{text-align:center}
+#palette{display:flex;justify-content:center;gap:7px;flex-wrap:wrap}
+.swatch{width:34px;height:34px;border:2px solid #ffffff70;border-radius:8px;padding:0}
+.swatch.active{outline:2px solid white;outline-offset:2px}
+#status{text-align:center;font-size:12px;color:#bdcbe0;margin-top:10px}
+#crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:23px;color:#fff;text-shadow:0 0 6px #000}
+#hint{position:absolute;left:18px;bottom:20px;color:#d0d8e9;font-size:12px;line-height:1.8;text-shadow:0 2px 4px #000}
+#toast{position:absolute;top:23%;left:50%;transform:translateX(-50%);background:#101827d9;border:1px solid #6c809c;padding:11px 18px;border-radius:8px;opacity:0;transition:opacity .2s}
+#overlay{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(120deg,#0c1428ed,#12233ddd);z-index:5;padding:20px}
+#intro{max-width:530px;text-align:center;padding:32px;background:#18253c;border:1px solid #6688ad;border-radius:20px;box-shadow:0 25px 100px #0009}
+#intro h1{font-size:clamp(30px,6vw,48px);margin:0;color:#75ecff}
+#intro p{line-height:1.7;color:#cbd6e8}
+#play{background:linear-gradient(110deg,#168caa,#625be5);border:0;padding:15px 32px;font-size:16px;border-radius:10px}
+#mobile{display:none;position:absolute;left:12px;bottom:125px;pointer-events:auto}
+#mobile button{width:44px;height:44px;padding:0;font-size:19px}
+@media(max-width:650px){
+ #brand{top:8px;left:8px;padding:8px}
+ #brand strong{font-size:14px}
+ #tools{top:8px;right:8px;width:145px;padding:9px}
+ #tools button{padding:7px;font-size:11px}
+ #bottom{bottom:8px;padding:8px}
+ #hint{display:none}
+ #mobile{display:block}
+}
 </style>
 </head>
 <body>
-<canvas id="game"></canvas>
+<div id="ui">
+ <div id="brand" class="panel">
+  <strong>✦ FIDGET LAB 3D</strong>
+  <small>DESIGN • BUILD • PLAY</small>
+ </div>
 
-<div id="top">
-  <div id="title">MINECRAFT: SKYBLOCK</div>
-  <div id="stats">
-    ❤️ <span id="hp">10</span>/10<br>
-    💰 Coins: <span id="coins">0</span><br>
-    ⛏️ Blocks mined: <span id="mined">0</span><br>
-    🌳 Objective: Build your island!
-  </div>
-</div>
+ <div id="tools" class="panel">
+  <h3>BUILD MENU</h3>
+  <button data-mode="spinner" class="active">✦ Fidget spinner <span>01</span></button>
+  <button data-mode="clicker">▣ Mechanical clicker <span>02</span></button>
+  <button data-mode="cube">⬡ Infinity cube <span>03</span></button>
+  <button data-mode="custom">＋ Custom parts <span>04</span></button>
+  <hr style="border-color:#34435e;margin:10px 0">
+  <button id="spin">▶ Spin my toy</button>
+  <button id="remove">⌫ Remove last part</button>
+  <button id="clear">↻ Clear workbench</button>
+  <button id="save">↓ Save design</button>
+ </div>
 
-<div id="help">
-  <b>CONTROLS</b><br>
-  WASD — Move<br>
-  Mouse — Look around<br>
-  Left click — Mine block<br>
-  Right click — Place block<br>
-  1–7 — Select block<br>
-  Space — Jump<br>
+ <div id="crosshair">+</div>
+ <div id="toast"></div>
+
+ <div id="hint">
+  WASD — Move &nbsp; Mouse — Look<br>
+  Click workbench — Place part<br>
+  Q / E — Rotate part<br>
+  Click a part — Select it<br>
   ESC — Release mouse
-</div>
+ </div>
 
-<div id="crosshair">+</div>
-<div id="notice">Click the game to explore!</div>
-<div id="hotbar"></div>
+ <div id="mobile">
+  <button id="mf">▲</button><br>
+  <button id="ml">◀</button>
+  <button id="mb">▼</button>
+  <button id="mr">▶</button>
+ </div>
 
-<div id="mobile">
-  <button id="forward">▲</button>
-  <div>
-    <button id="left">◀</button>
-    <button id="back">▼</button>
-    <button id="right">▶</button>
-  </div>
+ <div id="bottom" class="panel">
+  <h3>✦ MATERIAL & COLOUR</h3>
+  <div id="palette"></div>
+  <div id="status">Spinner mode · Pick a material and click the workbench</div>
+ </div>
 </div>
 
 <div id="overlay">
-  <div id="box">
-    <h1>MINECRAFT SKYBLOCK</h1>
-    <p>Explore a blocky floating island!</p>
-    <p>Mine blocks, chop trees, collect resources and build whatever you want.</p>
-    <button id="start">PLAY</button>
-  </div>
+ <div id="intro">
+  <h1>FIDGET LAB</h1>
+  <p>Welcome to your personal 3D toy workshop. Create glossy fidget spinners, mechanical clickers, infinity cubes, and completely original designs.</p>
+  <p>Walk around in first person, choose your materials, and build something satisfying.</p>
+  <button id="play">ENTER WORKSHOP →</button>
+  <p style="font-size:11px">Requires an internet connection to load the 3D engine.</p>
+ </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
-let W,H;
-function resize(){
-  W=canvas.width=innerWidth;
-  H=canvas.height=innerHeight;
+(() => {
+const canvasRenderer = new THREE.WebGLRenderer({antialias:true});
+canvasRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
+canvasRenderer.setSize(innerWidth,innerHeight);
+canvasRenderer.shadowMap.enabled=true;
+canvasRenderer.shadowMap.type=THREE.PCFSoftShadowMap;
+canvasRenderer.outputEncoding=THREE.sRGBEncoding;
+canvasRenderer.toneMapping=THREE.ACESFilmicToneMapping;
+canvasRenderer.toneMappingExposure=1.15;
+document.body.prepend(canvasRenderer.domElement);
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color("#8cb8d6");
+scene.fog=new THREE.Fog("#8cb8d6",17,43);
+
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,100);
+camera.position.set(0,1.7,5);
+
+scene.add(new THREE.HemisphereLight(0xd9edff,0x394054,2));
+
+const keyLight=new THREE.DirectionalLight(0xfff0d8,3.5);
+keyLight.position.set(-5,10,5);
+keyLight.castShadow=true;
+keyLight.shadow.mapSize.set(2048,2048);
+keyLight.shadow.camera.left=-12;
+keyLight.shadow.camera.right=12;
+keyLight.shadow.camera.top=12;
+keyLight.shadow.camera.bottom=-12;
+scene.add(keyLight);
+
+const fill=new THREE.PointLight(0x58cfff,45,18);
+fill.position.set(4,4,1);
+scene.add(fill);
+
+const pinkLight=new THREE.PointLight(0xff59c9,24,12);
+pinkLight.position.set(-5,3,-3);
+scene.add(pinkLight);
+
+const mat=(color,roughness=.25,metalness=.12,extra={})=>
+ new THREE.MeshStandardMaterial({color,roughness,metalness,...extra});
+
+const floorMat=mat("#30394b",.8);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),floorMat);
+floor.rotation.x=-Math.PI/2;
+floor.position.y=-.04;
+floor.receiveShadow=true;
+scene.add(floor);
+
+// Workshop floor details
+for(let x=-30;x<=30;x+=2){
+ const line=new THREE.Mesh(new THREE.BoxGeometry(.012,.005,60),mat("#566175",.8));
+ line.position.set(x,.001,-10);
+ scene.add(line);
 }
-addEventListener("resize",resize);
-resize();
+for(let z=-38;z<=20;z+=2){
+ const line=new THREE.Mesh(new THREE.BoxGeometry(60,.005,.012),mat("#566175",.8));
+ line.position.set(0,.001,z);
+ scene.add(line);
+}
 
-const TILE=1;
-const world=new Map();
-const key=(x,y,z)=>`${x},${y},${z}`;
-const get=(x,y,z)=>world.get(key(x,y,z));
-const set=(x,y,z,b)=>world.set(key(x,y,z),b);
-const del=(x,y,z)=>world.delete(key(x,y,z));
+// Walls and studio panels
+function box(w,h,d,material,x,y,z){
+ const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
+ mesh.position.set(x,y,z);
+ mesh.castShadow=true;
+ mesh.receiveShadow=true;
+ scene.add(mesh);
+ return mesh;
+}
+box(20,7,.3,mat("#202c42",.7),0,3.4,-9);
+box(.3,7,18,mat("#26374f",.7),-10,3.4,0);
+box(.3,7,18,mat("#26374f",.7),10,3.4,0);
 
-const blocks={
- grass:{top:"#68b94c",side:"#559640",icon:"🟩"},
- dirt:{top:"#95613b",side:"#754729",icon:"🟫"},
- stone:{top:"#aaaeb3",side:"#777d85",icon:"⬜"},
- wood:{top:"#b88651",side:"#78502d",icon:"🪵"},
- leaves:{top:"#42a83e",side:"#267b31",icon:"🌿"},
- sand:{top:"#e6d18b",side:"#b9a66d",icon:"🟨"},
- brick:{top:"#b55e4d",side:"#813e35",icon:"🧱"}
-};
+for(let i=0;i<5;i++){
+ box(1.4,.04,.05,mat(i%2?"#4ce4ff":"#b86cff",.3,.3),
+     -7+i*3.5,4.8,-8.8);
+}
 
-let selected=0;
-const inventory=["grass","dirt","stone","wood","leaves","sand","brick"];
-const amount={grass:30,dirt:30,stone:15,wood:12,leaves:12,sand:8,brick:8};
-let mined=0,coins=0,hp=10;
-let running=false,gameOver=false;
-let tick=0;
-let jump=0,jumpV=0;
-let noticeTimer=0;
-
-const player={
- x:0,y:-3.5,z:2.5,
- angle:0,pitch:0
-};
-
-// Generate a floating island with grass, dirt and stone
-for(let x=-9;x<=9;x++){
- for(let z=-9;z<=9;z++){
-  const d=Math.sqrt(x*x+z*z);
-  if(d<9){
-   set(x,0,z,"grass");
-   set(x,-1,z,"dirt");
-   if(d<6)set(x,-2,z,"stone");
-   if(d<3)set(x,-3,z,"stone");
-  }
+// Workbench
+const tableTopY=1.03;
+box(7,.28,5,mat("#272d3b",.32,.3),0,.85,-2);
+box(7.1,.07,5.1,mat("#66758c",.25,.45),0,1.01,-2);
+for(const x of [-3,3]){
+ for(const z of [-3.9,-.1]){
+  box(.18,.83,.18,mat("#303747",.35,.5),x,.43,z);
  }
 }
 
-// Trees
-function tree(x,z){
- for(let y=1;y<=3;y++)set(x,y,z,"wood");
- for(let dx=-2;dx<=2;dx++){
-  for(let dz=-2;dz<=2;dz++){
-   for(let dy=2;dy<=4;dy++){
-    if(Math.abs(dx)+Math.abs(dz)+(dy===4?1:0)<5){
-     if(!get(x+dx,dy,z+dz))set(x+dx,dy,z+dz,"leaves");
-    }
-   }
-  }
+// Grid printed on work surface
+for(let x=-3.3;x<=3.31;x+=.5){
+ const line=box(.009,.009,4.8,mat("#a3b6c9",.65),x,1.052,-2);
+ line.castShadow=false;
+}
+for(let z=-4.3;z<=.31;z+=.5){
+ const line=box(6.8,.009,.009,mat("#a3b6c9",.65),0,1.053,z);
+ line.castShadow=false;
+}
+
+// Background shelves
+for(let y of [2.3,3.8]){
+ box(4,.13,.65,mat("#3e4d63",.4,.25),-6,y,-5.8);
+ for(let i=0;i<5;i++){
+  const colors=["#f26ca7","#5be3f3","#a78bfa","#f4c45c","#64d9a5"];
+  const toy= new THREE.Mesh(
+   new THREE.TorusGeometry(.18,.065,10,24),
+   mat(colors[i],.2,.3)
+  );
+  toy.position.set(-7.5+i*.7,y+.22,-5.8);
+  toy.castShadow=true;
+  scene.add(toy);
  }
 }
-tree(-5,-4);
-tree(5,-5);
-tree(5,4);
 
-// Small stone-and-wood house
-for(let x=-2;x<=1;x++){
- for(let z=-8;z<=-5;z++){
-  set(x,1,z,"wood");
-  set(x,2,z,"wood");
- }
-}
-for(let x=-2;x<=1;x++){
- for(let z=-8;z<=-5;z++){
-  set(x,3,z,"stone");
- }
-}
-for(let y=1;y<=2;y++){
- set(-1,y,-5,"air");
-}
-del(-1,1,-5);
-del(-1,2,-5);
-
-// Portal decoration
-for(let y=1;y<=3;y++){
- set(0,y,7,"stone");
- set(2,y,7,"stone");
-}
-for(let x=0;x<=2;x++){
- set(x,4,7,"stone");
-}
-for(let y=1;y<=3;y++)set(1,y,7,"brick");
-
-const bar=document.getElementById("hotbar");
-inventory.forEach((b,i)=>{
- const el=document.createElement("div");
- el.className="slot"+(i===0?" selected":"");
- el.innerHTML=`<span class="num">${i+1}</span>${blocks[b].icon}`;
- el.onclick=()=>select(i);
- bar.appendChild(el);
-});
-function select(i){
- selected=(i+inventory.length)%inventory.length;
- document.querySelectorAll(".slot").forEach((e,j)=>
-  e.classList.toggle("selected",i===j));
- showNotice("Selected: "+inventory[selected]);
-}
-
-function showNotice(t){
- document.getElementById("notice").textContent=t;
- noticeTimer=100;
-}
-function updateHUD(){
- document.getElementById("hp").textContent=hp;
- document.getElementById("coins").textContent=coins;
- document.getElementById("mined").textContent=mined;
- [...bar.children].forEach((el,i)=>{
-  const b=inventory[i];
-  el.innerHTML=`<span class="num">${i+1}</span>${blocks[b].icon}<span style="position:absolute;bottom:0;right:3px;font-size:12px">${amount[b]}</span>`;
- });
-}
-
-// First-person voxel ray marcher
-function raycast(){
- const ca=Math.cos(player.angle);
- const sa=Math.sin(player.angle);
- const cp=Math.cos(player.pitch);
- const sp=Math.sin(player.pitch);
-
- let ox=player.x,oy=player.y,oz=player.z+jump;
- let vx=ca*cp,vy=sa*cp,vz=sp;
-
- for(let t=.15;t<7;t+=.055){
-  let x=Math.floor(ox+vx*t);
-  let y=Math.floor(oy+vy*t);
-  let z=Math.floor(oz+vz*t);
-  let b=get(x,y,z);
-  if(b && b!=="air"){
-   return {x,y,z,b,t};
-  }
- }
- return null;
-}
-
-function faceColor(base,shade){
- const n=parseInt(base.slice(1),16);
- let r=Math.max(0,Math.min(255,((n>>16)&255)*shade));
- let g=Math.max(0,Math.min(255,((n>>8)&255)*shade));
- let b=Math.max(0,Math.min(255,(n&255)*shade));
- return `rgb(${r|0},${g|0},${b|0})`;
-}
-
-// Render block faces using a first-person perspective
-function render(){
- const sky=ctx.createLinearGradient(0,0,0,H);
- sky.addColorStop(0,"#61b5ed");
- sky.addColorStop(.55,"#b3e7ff");
- sky.addColorStop(.56,"#84b8e9");
- sky.addColorStop(1,"#426b9c");
- ctx.fillStyle=sky;
- ctx.fillRect(0,0,W,H);
-
- // Distant clouds
- ctx.fillStyle="#ffffffaa";
- for(let i=0;i<9;i++){
-  let x=((i*211-player.x*10)% (W+180)+W+180)%(W+180)-90;
-  let y=H*.14+(i%4)*35;
-  ctx.fillRect(x,y,75,18);
-  ctx.fillRect(x+15,y-12,40,14);
- }
-
- // Draw visible cube faces with a grid of ray samples
- const focal=Math.min(W,H)*.9;
- const cols=Math.ceil(W/4);
- const rows=Math.ceil(H/4);
- const zbuffer=new Float32Array(cols);
- zbuffer.fill(99);
-
- for(let sx=0;sx<cols;sx++){
-  let screenX=(sx*4-W/2)/focal;
-  let ang=player.angle+Math.atan(screenX);
-  let rx=Math.cos(ang),ry=Math.sin(ang);
-
-  for(let sy=0;sy<rows;sy++){
-   const screenY=(H/2-sy*4)/focal+player.pitch;
-   let hit=null;
-
-   for(let t=.12;t<9;t+=.09){
-    let wx=player.x+rx*t;
-    let wy=player.y+ry*t;
-    let wz=player.z+jump+screenY*t;
-    let bx=Math.floor(wx),by=Math.floor(wy),bz=Math.floor(wz);
-    const b=get(bx,by,bz);
-    if(b && b!=="air"){
-     hit={b,t,wx,wy,wz,bx,by,bz};
-     break;
-    }
-   }
-
-   if(hit){
-    const def=blocks[hit.b];
-    let shade=.88;
-    const fracX=hit.wx-Math.floor(hit.wx);
-    const fracY=hit.wy-Math.floor(hit.wy);
-    const fracZ=hit.wz-Math.floor(hit.wz);
-
-    if(fracZ<.11)shade=1.0;
-    else if(fracX<.09||fracY<.09)shade=.62;
-    else shade=.82;
-
-    const fog=Math.min(1,hit.t/12);
-    const base=def.side;
-    const color=faceColor(base,shade*(1-fog*.25));
-    ctx.fillStyle=color;
-    ctx.fillRect(sx*4,sy*4,4,4);
-
-    // Pixel block seams
-    if(fracZ<.06||fracX<.05||fracY<.05){
-     ctx.fillStyle="#00000017";
-     ctx.fillRect(sx*4,sy*4,4,1);
-    }
-   }
-  }
- }
-
- // Crosshair-target block outline
- const target=raycast();
- if(target){
-  document.getElementById("notice").style.color="#fff4a3";
- }
-
- // Hand and held block
- ctx.fillStyle="#e2b18b";
- ctx.fillRect(W*.68,H*.82,55,75);
- ctx.fillStyle=blocks[inventory[selected]].side;
- ctx.fillRect(W*.72,H*.78,48,48);
- ctx.fillStyle=blocks[inventory[selected]].top;
- ctx.fillRect(W*.72,H*.78,48,10);
-
- // Crosshair outline
- ctx.strokeStyle="#fff";
- ctx.lineWidth=2;
- ctx.beginPath();
- ctx.moveTo(W/2-9,H/2);ctx.lineTo(W/2+9,H/2);
- ctx.moveTo(W/2,H/2-9);ctx.lineTo(W/2,H/2+9);
- ctx.stroke();
-}
-
-// Mining and placing blocks
-function mine(){
- if(!running)return;
- const h=raycast();
- if(!h){showNotice("No block in reach!");return}
- if(h.t>6.5){showNotice("That block is too far away!");return}
- del(h.x,h.y,h.z);
- amount[h.b]=(amount[h.b]||0)+1;
- mined++;
- coins+=2;
- showNotice("Mined "+h.b+"! +2 coins");
- updateHUD();
-}
-
-function place(){
- if(!running)return;
- const h=raycast();
- if(!h){showNotice("Look at a block to build!");return}
- if(h.t>6){showNotice("Too far away!");return}
- const dx=player.x-h.x,dy=player.y-h.y,dz=player.z-h.z;
- let ax=0,ay=0,az=0;
- if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>Math.abs(dz))ax=dx>0?1:-1;
- else if(Math.abs(dy)>Math.abs(dz))ay=dy>0?1:-1;
- else az=dz>0?1:-1;
-
- const nx=h.x+ax,ny=h.y+ay,nz=h.z+az;
- if(get(nx,ny,nz)){showNotice("Space is occupied!");return}
- const b=inventory[selected];
- if(amount[b]<=0){showNotice("You don't have that block!");return}
- set(nx,ny,nz,b);
- amount[b]--;
- updateHUD();
- showNotice("Block placed!");
-}
-
+// Materials
+const palette=[
+ ["Cyber blue","#16d9ff"],["Hot pink","#ff3e9d"],
+ ["Violet","#9a5cff"],["Lime","#8aff42"],
+ ["Sunset orange","#ff8b35"],["Ice white","#eaf4ff"],
+ ["Ruby red","#f23c53"],["Gold","#ffd45c"],
+ ["Obsidian","#252b3a"],["Mint","#5bffd0"]
+];
+let chosenColor=palette[0][1];
+let mode="spinner";
+let selectedObject=null;
+let spinning=false;
+let lastTime=performance.now();
+const parts=[];
+const raycaster=new THREE.Raycaster();
+const pointer=new THREE.Vector2(0,0);
+const buildPlane=new THREE.Plane(new THREE.Vector3(0,1,0),-tableTopY);
+const hitPoint=new THREE.Vector3();
 const keys={};
-addEventListener("keydown",e=>{
- keys[e.key.toLowerCase()]=true;
- if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(e.key.toLowerCase()))e.preventDefault();
- if(e.key>="1"&&e.key<="7")select(Number(e.key)-1);
- if(e.code==="Space"&&jump===0)jumpV=.18;
-});
-addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+let mouseLocked=false;
 
-canvas.addEventListener("click",()=>{
- if(!running)return;
- if(document.pointerLockElement!==canvas)canvas.requestPointerLock?.();
+const paletteUI=document.getElementById("palette");
+palette.forEach(([name,color],i)=>{
+ const b=document.createElement("button");
+ b.className="swatch"+(i===0?" active":"");
+ b.style.background=color;
+ b.title=name;
+ b.onclick=()=>{
+  chosenColor=color;
+  [...paletteUI.children].forEach((el,j)=>el.classList.toggle("active",i===j));
+  document.getElementById("status").textContent=name+" selected";
+ };
+ paletteUI.appendChild(b);
 });
-canvas.addEventListener("mousedown",e=>{
- if(!running)return;
- if(e.button===0)mine();
- if(e.button===2)place();
-});
-canvas.addEventListener("contextmenu",e=>e.preventDefault());
 
+function shiny(color){
+ return mat(color,.19,.32,{metalness:.28});
+}
+function makeMesh(geometry,material,x,y,z,parent){
+ const m=new THREE.Mesh(geometry,material);
+ m.position.set(x,y,z);
+ m.castShadow=true;
+ m.receiveShadow=true;
+ (parent||scene).add(m);
+ return m;
+}
+
+function register(group,label){
+ group.userData.label=label;
+ group.userData.isToyPart=true;
+ parts.push(group);
+ scene.add(group);
+ selectedObject=group;
+ updateStatus();
+}
+
+function addPiece(geometry,x,y,z,color=chosenColor,label="Part"){
+ const g=new THREE.Group();
+ g.position.set(x,y,z);
+ makeMesh(geometry,shiny(color),0,0,0,g);
+ register(g,label);
+ return g;
+}
+
+function bearing(parent,x,y,z,r=.19){
+ const metal=mat("#c6d6e9",.15,.85);
+ const black=mat("#303b4c",.2,.6);
+ makeMesh(new THREE.CylinderGeometry(r,r,.09,32),black,x,y,z,parent);
+ makeMesh(new THREE.TorusGeometry(r*.65,.035,10,32),metal,x,y+.055,z,parent);
+ makeMesh(new THREE.CylinderGeometry(r*.26,r*.26,.11,24),metal,x,y+.02,z,parent);
+}
+
+function addSpinner(x=0,z=-2){
+ const g=new THREE.Group();
+ g.position.set(x,tableTopY+.13,z);
+ const color=chosenColor;
+ const body=shiny(color);
+ makeMesh(new THREE.CylinderGeometry(.34,.34,.13,48),body,0,0,0,g);
+ makeMesh(new THREE.TorusGeometry(.31,.025,12,48),mat("#eaf6ff",.12,.8),0,.07,0,g);
+ bearing(g,0,.07,0,.17);
+
+ for(let i=0;i<3;i++){
+  const a=i*Math.PI*2/3;
+  const px=Math.cos(a)*.85,pz=Math.sin(a)*.85;
+  makeMesh(new THREE.SphereGeometry(.43,32,24),body,px,0,pz,g);
+  makeMesh(new THREE.TorusGeometry(.29,.045,12,32),
+   mat("#d7e7f8",.13,.8),px,.03,pz,g);
+  bearing(g,px,.04,pz,.19);
+ }
+ register(g,"Fidget Spinner");
+ return g;
+}
+
+function addClicker(x=0,z=-2){
+ const g=new THREE.Group();
+ g.position.set(x,tableTopY+.13,z);
+ const base=shiny(chosenColor);
+ const dark=mat("#273348",.2,.5);
+ makeMesh(new THREE.BoxGeometry(1.35,.16,.92),dark,0,0,0,g);
+ makeMesh(new THREE.BoxGeometry(1.25,.1,.82),base,0,.1,0,g);
+ for(let i=0;i<3;i++){
+  const x0=(i-1)*.38;
+  makeMesh(new THREE.CylinderGeometry(.15,.15,.15,32),
+   mat("#dceaff",.15,.7),x0,.22,0,g);
+  makeMesh(new THREE.CylinderGeometry(.105,.105,.16,32),
+   base,x0,.29,0,g);
+ }
+ makeMesh(new THREE.BoxGeometry(.25,.08,.7),
+  mat("#eaf6ff",.15,.8),.74,.12,0,g);
+ register(g,"Mechanical Clicker");
+ return g;
+}
+
+function addCube(x=0,z=-2){
+ const g=new THREE.Group();
+ g.position.set(x,tableTopY+.16,z);
+ const colors=[chosenColor,"#f8fbff","#26364c","#69e5ff"];
+ for(let i=0;i<4;i++){
+  const block=new THREE.Mesh(
+   new THREE.BoxGeometry(.43,.43,.43),
+   shiny(colors[i%colors.length])
+  );
+  block.position.set((i%2)*.47-.24,0,Math.floor(i/2)*.47-.24);
+  block.rotation.set(.04*(i%2),.04*i,0);
+  block.castShadow=true;
+  block.receiveShadow=true;
+  g.add(block);
+  const edge=new THREE.LineSegments(
+   new THREE.EdgesGeometry(block.geometry),
+   new THREE.LineBasicMaterial({color:"#ffffff",transparent:true,opacity:.7})
+  );
+  block.add(edge);
+ }
+ register(g,"Infinity Cube");
+ return g;
+}
+
+function addCustom(x,z){
+ const options=[
+  ()=>addPiece(new THREE.CylinderGeometry(.36,.36,.16,40),x,tableTopY+.13,z,chosenColor,"Round Cap"),
+  ()=>addPiece(new THREE.BoxGeometry(.8,.2,.55),x,tableTopY+.12,z,chosenColor,"Block"),
+  ()=>addPiece(new THREE.TorusGeometry(.32,.1,18,40),x,tableTopY+.19,z,chosenColor,"Ring"),
+  ()=>addPiece(new THREE.SphereGeometry(.32,28,20),x,tableTopY+.32,z,chosenColor,"Orb"),
+  ()=>addPiece(new THREE.BoxGeometry(.95,.12,.22),x,tableTopY+.11,z,chosenColor,"Bar")
+ ];
+ options[Math.floor(Math.random()*options.length)]();
+}
+
+function updateStatus(){
+ document.getElementById("status").textContent=
+  mode.toUpperCase()+" MODE · "+(selectedObject?selectedObject.userData.label:"Choose a part");
+}
+
+function toast(msg){
+ const el=document.getElementById("toast");
+ el.textContent=msg;
+ el.style.opacity=1;
+ clearTimeout(toast.timer);
+ toast.timer=setTimeout(()=>el.style.opacity=0,1800);
+}
+
+document.querySelectorAll("[data-mode]").forEach(btn=>{
+ btn.onclick=()=>{
+  mode=btn.dataset.mode;
+  document.querySelectorAll("[data-mode]").forEach(b=>b.classList.toggle("active",b===btn));
+  updateStatus();
+  toast("Build mode: "+mode);
+ };
+});
+
+function findBuildPoint(){
+ raycaster.setFromCamera(pointer,camera);
+ const hit=new THREE.Vector3();
+ if(!raycaster.ray.intersectPlane(buildPlane,hit))return null;
+ if(Math.abs(hit.x)>3.35||hit.z< -4.35||hit.z>.35)return null;
+ return {x:Math.round(hit.x*2)/2,z:Math.round(hit.z*2)/2};
+}
+
+function build(){
+ const p=findBuildPoint();
+ if(!p){toast("Aim at the workbench to build");return}
+ if(mode==="spinner")addSpinner(p.x,p.z);
+ else if(mode==="clicker")addClicker(p.x,p.z);
+ else if(mode==="cube")addCube(p.x,p.z);
+ else addCustom(p.x,p.z);
+ toast("Built "+selectedObject.userData.label+"!");
+}
+
+function choosePart(){
+ raycaster.setFromCamera(pointer,camera);
+ const hits=raycaster.intersectObjects(parts,true);
+ if(!hits.length)return false;
+ let o=hits[0].object;
+ while(o.parent&&!o.userData.isToyPart)o=o.parent;
+ if(o.userData.isToyPart){
+  selectedObject=o;
+  updateStatus();
+  return true;
+ }
+ return false;
+}
+
+canvasRenderer.domElement.addEventListener("click",()=>{
+ if(!running)return;
+ if(!mouseLocked){
+  canvasRenderer.domElement.requestPointerLock?.();
+  return;
+ }
+ if(!choosePart())build();
+});
+canvasRenderer.domElement.addEventListener("contextmenu",e=>e.preventDefault());
+canvasRenderer.domElement.addEventListener("mousedown",e=>{
+ if(!running)return;
+ if(e.button===2){
+  if(!choosePart())build();
+ }
+});
+document.addEventListener("pointerlockchange",()=>{
+ mouseLocked=document.pointerLockElement===canvasRenderer.domElement;
+});
 document.addEventListener("mousemove",e=>{
- if(document.pointerLockElement===canvas){
-  player.angle+=e.movementX*.0025;
-  player.pitch-=e.movementY*.002;
-  player.pitch=Math.max(-.7,Math.min(.7,player.pitch));
- }
+ if(!mouseLocked)return;
+ camera.rotation.order="YXZ";
+ camera.rotation.y-=e.movementX*.002;
+ camera.rotation.x-=e.movementY*.002;
+ camera.rotation.x=Math.max(-1.25,Math.min(1.25,camera.rotation.x));
 });
 
-function solid(x,y,z){
- return !!get(Math.floor(x),Math.floor(y),Math.floor(z));
-}
+document.addEventListener("keydown",e=>{
+ keys[e.key.toLowerCase()]=true;
+ if(e.key.toLowerCase()==="q"&&selectedObject)selectedObject.rotation.y-=Math.PI/12;
+ if(e.key.toLowerCase()==="e"&&selectedObject)selectedObject.rotation.y+=Math.PI/12;
+ if(e.key.toLowerCase()==="f")build();
+ if(e.key==="Escape")mouseLocked=false;
+});
+document.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
 
-function update(){
- if(!running)return;
- const speed=.075;
- const forward=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0);
- const side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);
+document.getElementById("spin").onclick=()=>{
+ spinning=!spinning;
+ document.getElementById("spin").textContent=spinning?"Ⅱ Stop spinning":"▶ Spin my toy";
+ toast(spinning?"Your toys are spinning!":"Stopped spinning");
+};
+document.getElementById("remove").onclick=()=>{
+ if(!selectedObject){toast("Select a part first");return}
+ scene.remove(selectedObject);
+ const i=parts.indexOf(selectedObject);
+ if(i>=0)parts.splice(i,1);
+ selectedObject=parts[parts.length-1]||null;
+ updateStatus();
+ toast("Part removed");
+};
+document.getElementById("clear").onclick=()=>{
+ parts.forEach(p=>scene.remove(p));
+ parts.length=0;
+ selectedObject=null;
+ updateStatus();
+ toast("Workbench cleared");
+};
+document.getElementById("save").onclick=()=>{
+ const data=parts.map(p=>({
+  label:p.userData.label,
+  position:p.position.toArray(),
+  rotation:p.rotation.toArray(),
+  color:chosenColor
+ }));
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);
+ a.download="my-fidget-design.json";
+ a.click();
+ URL.revokeObjectURL(a.href);
+ toast("Design saved as JSON");
+};
 
- const dx=(Math.cos(player.angle)*forward-Math.sin(player.angle)*side)*speed;
- const dy=(Math.sin(player.angle)*forward+Math.cos(player.angle)*side)*speed;
-
- if(!solid(player.x+dx,player.y,player.z))player.x+=dx;
- if(!solid(player.x,player.y+dy,player.z))player.y+=dy;
-
- if(jump>0||jumpV>0){
-  jump+=jumpV;
-  jumpV-=.012;
-  if(jump<0){jump=0;jumpV=0}
- }
-}
-
-let last=0;
-function loop(time){
- if(time-last>16){
-  update();
-  render();
-  last=time;
-  if(noticeTimer>0)noticeTimer--;
-  else document.getElementById("notice").textContent=
-    "Mine blocks with left click • Place blocks with right click";
- }
- requestAnimationFrame(loop);
-}
-
-document.getElementById("start").onclick=()=>{
+let running=false;
+document.getElementById("play").onclick=()=>{
  running=true;
  document.getElementById("overlay").style.display="none";
- canvas.requestPointerLock?.();
- showNotice("Welcome to your SkyBlock island!");
+ canvasRenderer.domElement.requestPointerLock?.();
+ toast("Welcome to Fidget Lab!");
 };
 
-document.getElementById("forward").onpointerdown=()=>keys.w=true;
-document.getElementById("forward").onpointerup=()=>keys.w=false;
-document.getElementById("back").onpointerdown=()=>keys.s=true;
-document.getElementById("back").onpointerup=()=>keys.s=false;
-document.getElementById("left").onpointerdown=()=>keys.a=true;
-document.getElementById("left").onpointerup=()=>keys.a=false;
-document.getElementById("right").onpointerdown=()=>keys.d=true;
-document.getElementById("right").onpointerup=()=>keys.d=false;
+// Mobile movement buttons
+function hold(id,k){
+ const el=document.getElementById(id);
+ el.addEventListener("pointerdown",e=>{e.preventDefault();keys[k]=true});
+ ["pointerup","pointercancel","pointerleave"].forEach(ev=>
+  el.addEventListener(ev,()=>keys[k]=false));
+}
+hold("mf","w");hold("mb","s");hold("ml","a");hold("mr","d");
 
-updateHUD();
-loop(0);
+function animate(now){
+ requestAnimationFrame(animate);
+ const dt=Math.min((now-lastTime)/16.67,2);
+ lastTime=now;
+
+ if(running){
+  const speed=.075*dt;
+  const forward=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0);
+  const side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);
+  const direction=new THREE.Vector3();
+  camera.getWorldDirection(direction);
+  direction.y=0;
+  direction.normalize();
+  const right=new THREE.Vector3().crossVectors(direction,new THREE.Vector3(0,1,0)).negate();
+  camera.position.addScaledVector(direction,forward*speed);
+  camera.position.addScaledVector(right,side*speed);
+  camera.position.x=Math.max(-8,Math.min(8,camera.position.x));
+  camera.position.z=Math.max(-7,Math.min(7,camera.position.z));
+ }
+
+ if(spinning){
+  parts.forEach(p=>p.rotation.y+=.045*dt);
+ }
+ canvasRenderer.render(scene,camera);
+}
+requestAnimationFrame(animate);
+
+addEventListener("resize",()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ canvasRenderer.setSize(innerWidth,innerHeight);
+});
+
+// Place a few sample toys on the workbench
+addSpinner(-1.3,-2.2);
+addClicker(1.1,-2.3);
+selectedObject=null;
+updateStatus();
+})();
 </script>
 </body>
 </html>
