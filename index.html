@@ -1,523 +1,316 @@
-x
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fidget World 3D</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dark Fidget Toy Simulator</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;font-family:Arial,sans-serif;background:#87ceeb}
-canvas{display:block}
-button{cursor:pointer;border:0;border-radius:9px;padding:10px;background:#50e0d0;color:#18223a;font-weight:bold}
-button:hover{background:#ffe066}
-#startScreen{
- position:fixed;inset:0;z-index:20;display:flex;
- align-items:center;justify-content:center;gap:25px;
- flex-wrap:wrap;overflow:auto;padding:20px;
- background:linear-gradient(135deg,#201044f5,#153e65f5);
- color:white;text-align:center
-}
-#startScreen h1{font-size:clamp(32px,5vw,56px);color:#ffe066;margin:0 0 8px}
-#startScreen p{color:#e8efff}
-#creator{
- width:260px;max-width:90vw;text-align:left;padding:17px;
- background:#20243bee;border:2px solid #ff71d2;border-radius:15px
-}
-#creator h3{margin:0 0 8px;color:#ffe066}
-#creator label{display:block;margin:7px 0;font-size:13px}
-#creator input[type=color]{display:block;width:100%;height:28px;margin-top:3px;border:0}
-#preview{width:220px;height:300px;border:2px solid #71f5ff;border-radius:16px;overflow:hidden;background:#28345a}
-#startButton{font-size:21px;padding:15px 38px;background:#ff71d2}
-#hud{
- position:fixed;top:12px;left:12px;z-index:5;
- color:white;background:#172033ed;padding:13px 16px;
- border:2px solid #55e6ff;border-radius:12px;line-height:1.7
-}
-#hud strong{color:#63f5ff;font-size:20px}
-#shopPanel{
- position:fixed;top:12px;right:12px;z-index:5;
- background:#172033ed;color:white;padding:12px;border-radius:12px;width:200px
-}
-#shopPanel h3{margin:0 0 8px;color:#ffe066}
-#shopPanel button{width:100%;margin:4px 0}
-#help{
- position:fixed;bottom:12px;left:50%;transform:translateX(-50%);
- background:#172033ed;color:white;padding:11px 16px;border-radius:10px;
- z-index:5;text-align:center;width:max-content;max-width:95%;font-size:13px
-}
-#message{
- position:fixed;top:15px;left:50%;transform:translateX(-50%);
- color:white;background:#8e44ad;padding:12px 20px;border-radius:10px;
- z-index:30;display:none;font-weight:bold
-}
-#customizeInGame{
- position:fixed;right:12px;bottom:100px;z-index:8;
- background:#20243bee;color:white;padding:10px;border-radius:10px;
-}
-#customizeInGame button{display:block;width:100%}
+body{margin:0;overflow:hidden;font-family:Arial,sans-serif;background:#05050b;color:white}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0;border-radius:8px;padding:10px 14px;background:#7049d8;color:white;font-weight:bold}
+button:hover{filter:brightness(1.2)}
+#hud{position:fixed;top:12px;left:12px;z-index:2;display:none;gap:8px;flex-wrap:wrap;max-width:calc(100% - 24px)}
+.panel{background:#090912ee;border:1px solid #65568b66;border-radius:12px;padding:12px;box-shadow:0 5px 25px #000b}
+#stats{position:fixed;top:12px;right:12px;z-index:2;display:none;min-width:170px}
+#help{position:fixed;bottom:12px;left:12px;z-index:2;display:none;background:#090912e8;padding:10px;border-radius:8px;font-size:13px}
+#startScreen{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#030307dd,#09051af5);overflow:auto;padding:20px}
+#menu{width:min(620px,100%);background:#0b0b17f7;border:1px solid #7161a855;border-radius:20px;padding:25px;box-shadow:0 20px 80px #000}
+h1{margin:0 0 8px;font-size:clamp(28px,5vw,44px)}
+.subtitle{color:#aaa8c4;margin:0 0 20px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:13px;color:#d0cce7}
+input,select{width:100%;margin-top:6px;padding:10px;border-radius:8px;border:1px solid #403653;background:#10101d;color:white}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+#startBtn{flex:1;background:#7c4dff;font-size:17px;padding:14px}
+#lookNote{font-size:12px;color:#918ba8;margin-top:12px}
+#message{position:fixed;bottom:55px;left:50%;transform:translateX(-50%);z-index:3;background:#090912f5;border:1px solid #65568b;border-radius:10px;padding:12px 18px;display:none;white-space:nowrap}
+#crosshair{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;display:none;font-size:24px;text-shadow:0 1px 4px black;pointer-events:none}
+#shop{position:fixed;right:12px;bottom:12px;z-index:3;display:none;width:240px}
+#shop button{width:100%;margin-top:7px}
+#lookStatus{color:#b7a6ff;font-size:12px;margin-top:8px}
+@media(max-width:520px){.fields{grid-template-columns:1fr}#menu{padding:18px}#stats{top:auto;bottom:12px;right:12px}}
 </style>
 </head>
 <body>
-
 <div id="startScreen">
- <div style="max-width:500px">
-  <h1>🎮 FIDGET WORLD</h1>
-  <h2 style="color:#71f5ff">Create Your Character!</h2>
-  <p>Customize your look before entering your colorful toy store.</p>
-  <div id="preview"></div>
-  <p>WASD to move · Drag the mouse to look around</p>
-  <button id="startButton">▶ START GAME</button>
- </div>
-
- <div id="creator">
-  <h3>👕 Character Creator</h3>
-  <label>Skin color<input type="color" id="skinColor" value="#e8b18b"></label>
-  <label>Hair color<input type="color" id="hairColor" value="#49301f"></label>
-  <label>Shirt color<input type="color" id="shirtColor" value="#2878ff"></label>
-  <label>Pants color<input type="color" id="pantsColor" value="#343b56"></label>
-  <label>Shoes color<input type="color" id="shoeColor" value="#202020"></label>
-  <label>Eye color<input type="color" id="eyeColor" value="#28b463"></label>
-  <button id="randomButton" style="width:100%;margin-top:8px">🎲 Random Outfit</button>
-  <button id="resetButton" style="width:100%;margin-top:6px">↩ Reset Outfit</button>
- </div>
+<div id="menu">
+<h1>🌙 Fidget Toy Simulator</h1>
+<p class="subtitle">Build toys in your dark, neon-lit fidget shop.</p>
+<div class="fields">
+<label>Character name<input id="playerName" value="Builder" maxlength="18"></label>
+<label>Skin color<select id="skin"><option value="#b67d52">Tan</option><option value="#e0b08a">Light</option><option value="#81502f">Brown</option><option value="#493024">Dark brown</option></select></label>
+<label>Hair color<select id="hair"><option value="#21150f">Dark brown</option><option value="#090909">Black</option><option value="#c6a33b">Blond</option><option value="#9b3929">Red</option><option value="#4e62c7">Blue</option></select></label>
+<label>Shirt color<select id="shirt"><option value="#274eaa">Blue</option><option value="#a52e3d">Red</option><option value="#23734e">Green</option><option value="#7540a4">Purple</option><option value="#bdbdcc">White</option><option value="#181820">Black</option></select></label>
+<label>Pants color<select id="pants"><option value="#202c4b">Navy</option><option value="#245039">Green</option><option value="#17171d">Black</option><option value="#70482c">Brown</option></select></label>
+<label>Shoes color<select id="shoes"><option value="#08080a">Black</option><option value="#dedee5">White</option><option value="#a32e3a">Red</option><option value="#b28b36">Gold</option></select></label>
+<label>Eye color<select id="eyes"><option value="#43d67b">Green</option><option value="#4aa7ff">Blue</option><option value="#765038">Brown</option><option value="#a76bff">Purple</option></select></label>
+</div>
+<div class="actions"><button id="randomBtn">🎲 Random Outfit</button><button id="resetBtn">Reset</button><button id="startBtn">START GAME</button></div>
+<p id="lookNote">WASD to move · Click and drag to look · E to make toys</p>
+<div id="lookStatus">Mouse capture is not required. Click and drag anywhere in the game to look around.</div>
+</div>
 </div>
 
-<div id="hud" style="display:none">
- <strong>🌀 FIDGET WORLD</strong><br>
- 💵 Cash: $<span id="cash">100</span><br>
- 🔧 Toys made: <span id="made">0</span><br>
- 🛍️ Toys sold: <span id="sold">0</span><br>
- ⭐ Store level: <span id="level">1</span>
+<div id="hud">
+<div class="panel"><b>🌀 Fidget Shop</b><br><small>Build • Stock • Sell</small></div>
+<button id="makeBtn">🔧 Make Toy (E)</button>
+<button id="sellBtn">💰 Sell Toys</button>
+<button id="restockBtn">📦 Restock</button>
+<button id="upgradeBtn">⬆ Upgrade Shop</button>
+<button id="customizeBtn">👕 Outfit</button>
 </div>
-
-<div id="shopPanel" style="display:none">
- <h3>🏪 Toy Workshop</h3>
- <button onclick="makeToy()">🔧 Make toy ($10)</button>
- <button onclick="sellToy()">💰 Sell toy (+$25)</button>
- <button onclick="changeLights()">💡 Change lights</button>
- <button onclick="buyUpgrade()">⬆ Upgrade ($100)</button>
- <button onclick="toggleCustomizer()">👕 Change outfit</button>
-</div>
-
-<div id="customizeInGame" style="display:none">
- <button onclick="document.getElementById('startScreen').style.display='flex'">
- 🎨 Open Character Creator
- </button>
-</div>
-
-<div id="help" style="display:none">
- <b>WASD</b> Move · <b>Mouse drag</b> Look · Use the shop buttons to make and sell toys
-</div>
+<div id="stats" class="panel"></div>
+<div id="help">WASD: Move · Click and drag: Look · E: Workshop · Shift: Run</div>
+<div id="crosshair">+</div>
 <div id="message"></div>
+<div id="shop" class="panel"><b>🛠️ Toy Workshop</b><p id="workshopText">Ready to build!</p><button id="workMake">Make a Toy — $10</button><button id="workClose">Close</button></div>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-(() => {
+(()=>{
 "use strict";
-
+if(!window.THREE){document.getElementById("menu").innerHTML="<h1>Could not load game</h1><p>Check your internet connection and reload.</p>";return;}
+const $=id=>document.getElementById(id);
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x91d9ff);
-scene.fog=new THREE.Fog(0x91d9ff,35,100);
-
-const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,150);
-camera.position.set(0,1.7,9);
-
+scene.background=new THREE.Color(0x05050b);
+scene.fog=new THREE.Fog(0x05050b,14,65);
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,200);
 const renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.outputEncoding=THREE.sRGBEncoding;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.15;
-document.body.appendChild(renderer.domElement);
-
-document.getElementById("preview").appendChild(renderer.domElement);
-renderer.domElement.style.position="fixed";
-renderer.domElement.style.inset="0";
-renderer.domElement.style.zIndex="0";
-renderer.domElement.style.pointerEvents="none";
-
-const hemi=new THREE.HemisphereLight(0xdaf3ff,0x60452e,2.1);
-scene.add(hemi);
-const sun=new THREE.DirectionalLight(0xffe3b0,3);
-sun.position.set(-8,15,8);
-sun.castShadow=true;
-sun.shadow.mapSize.set(2048,2048);
-scene.add(sun);
-
-let cash=100,made=0,sold=0,level=1,gameStarted=false,lightMode=0;
-let yaw=0,pitch=0,dragging=false,lastX=0,lastY=0;
-const keys={};
-const clock=new THREE.Clock();
-const toyObjects=[];
-const colorOptions=[0xff526b,0xffa62b,0xffe34d,0x49dca5,0x3dbbff,0x9b7bff,0xff71d2];
-
-function mat(color,roughness=.8,metalness=0){
- return new THREE.MeshStandardMaterial({color,roughness,metalness});
+renderer.toneMappingExposure=.65;
+Object.assign(renderer.domElement.style,{position:"fixed",inset:"0",width:"100%",height:"100%",zIndex:"0",cursor:"crosshair"});
+document.body.prepend(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0x34334d,0x08060d,.45));
+const sun=new THREE.DirectionalLight(0x8b86b8,.55);
+sun.position.set(-8,15,10);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
+const mat=(c,r=.8,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+const materials={brick:mat(0x54231f),mortar:mat(0x27171b),floor:mat(0x242431),dark:mat(0x171723),wood:mat(0x493023),shelf:mat(0x2b2028),white:mat(0x8c8b9f),gold:mat(0x92702c,.3,.25)};
+function box(w,h,d,m,x,y,z,cast=true,receive=true){
+ const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=cast;o.receiveShadow=receive;scene.add(o);return o;
 }
-function box(w,h,d,material,x,y,z,shadow=true){
- const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
- m.position.set(x,y,z);m.castShadow=shadow;m.receiveShadow=true;
- scene.add(m);return m;
+box(50,.3,50,materials.floor,0,-.16,0,false,true);
+
+function buildBrickWall(x,y,z,w,h,d){
+ box(w,h,d,materials.mortar,x,y,z,false,true);
+ const bw=1.15,bh=.48,colors=[0x54231f,0x612721,0x49201e,0x6b3028].map(c=>mat(c));
+ let row=0;
+ for(let yy=-h/2+bh/2;yy<h/2;yy+=bh){
+  const offset=row%2?bw/2:0;
+  for(let xx=-w/2+bw/2-offset;xx<w/2;xx+=bw){
+   const ww=Math.min(bw-.07,w/2-xx+bw/2);
+   if(ww>.15)box(ww,bh-.06,d+.03,colors[(row+Math.floor(xx*3)+20)%colors.length],x+xx,y+yy,z,false,true);
+  }
+  row++;
+ }
 }
-function cylinder(rt,rb,h,material,x,y,z,segments=24){
- const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,segments),material);
- m.position.set(x,y,z);m.castShadow=true;scene.add(m);return m;
+buildBrickWall(0,3,-20,40,6,.45);
+buildBrickWall(-20,3,0,.45,6,40);
+buildBrickWall(20,3,0,.45,6,40);
+const ceiling=box(40,.3,40,mat(0x11111c),0,6.2,0,false);ceiling.visible=false;
+
+for(let x=-16;x<=16;x+=4){
+ for(let z=-16;z<=16;z+=4){
+  const light=new THREE.PointLight(0x7772ff,.55,9);light.position.set(x,5.5,z);scene.add(light);
+  box(.8,.08,.8,mat(0x2a2540),x,5.9,z,false);
+  const glow=new THREE.Mesh(new THREE.BoxGeometry(.55,.025,.55),new THREE.MeshBasicMaterial({color:0x7772ff}));
+  glow.position.set(x,5.84,z);scene.add(glow);
+ }
 }
-function sphere(r,material,x,y,z){
- const m=new THREE.Mesh(new THREE.SphereGeometry(r,20,14),material);
- m.position.set(x,y,z);m.castShadow=true;scene.add(m);return m;
+for(let x=-18;x<=18;x+=2)for(let z=-18;z<=18;z+=2){
+ if(Math.abs(x)%4===0&&Math.abs(z)%4===0)continue;
+ box(1.95,.018,1.95,mat((x+z)%4===0?0x292938:0x20202c),x,.005,z,false);
 }
 
-// Ground and wooden floor
-box(70,.4,70,mat(0x9b6339),0,-.3,0);
-for(let z=-22;z<=22;z+=1.1)box(45,.018,.035,mat(0x543522),0,-.075,z,false);
-box(70,.25,70,mat(0x65a84d),0,-.62,0);
+const toyColors=[0xff354e,0xffb52e,0x35dca0,0x428cff,0xb26aff,0xff5cc8];
+const toys=[];
+function addToy(x,y,z,color,index=0,scale=1){
+ const g=new THREE.Group();g.position.set(x,y,z);scene.add(g);
+ const main=mat(color,.27,.12),dark=mat(0x28283a,.3,.15);
+ if(index%4===0){
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(.36*scale,.12*scale,12,32),main);ring.rotation.x=Math.PI/2;g.add(ring);
+  g.add(new THREE.Mesh(new THREE.CylinderGeometry(.16*scale,.16*scale,.12*scale,24),dark));
+  for(let i=0;i<3;i++){const o=new THREE.Mesh(new THREE.SphereGeometry(.12*scale,16,12),main);const a=i*Math.PI*2/3;o.position.set(Math.cos(a)*.36*scale,.03,Math.sin(a)*.36*scale);g.add(o);}
+ }else if(index%4===1){
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(.28*scale,.13*scale,12,32),main);ring.rotation.x=Math.PI/2;g.add(ring);
+  for(let i=0;i<8;i++){const o=new THREE.Mesh(new THREE.SphereGeometry(.07*scale,12,10),dark);const a=i*Math.PI/4;o.position.set(Math.cos(a)*.28*scale,0,Math.sin(a)*.28*scale);g.add(o);}
+ }else if(index%4===2){
+  const cube=new THREE.Mesh(new THREE.BoxGeometry(.5*scale,.5*scale,.5*scale),main);cube.rotation.set(.3,.5,.2);g.add(cube);
+  const dot=new THREE.Mesh(new THREE.SphereGeometry(.11*scale,16,12),dark);dot.position.y=.28*scale;g.add(dot);
+ }else{
+  for(let i=0;i<3;i++){const o=new THREE.Mesh(new THREE.SphereGeometry(.18*scale,16,12),main);const a=i*Math.PI*2/3;o.position.set(Math.cos(a)*.22*scale,0,Math.sin(a)*.22*scale);g.add(o);}
+  g.add(new THREE.Mesh(new THREE.SphereGeometry(.13*scale,16,12),dark));
+ }
+ toys.push(g);return g;
+}
 
-// Brick walls: staggered individual red bricks
-const brickMaterials=[0x9d422d,0xb95035,0x813b2c,0xc46545,0x9a4934].map(c=>mat(c));
-const mortar=mat(0xd3b8a0);
-function brickWall(width,height,x,y,z,rotation=0){
- const g=new THREE.Group();g.position.set(x,y,z);g.rotation.y=rotation;scene.add(g);
- const backing=new THREE.Mesh(new THREE.BoxGeometry(width,height,.35),mortar);
- backing.position.y=height/2;backing.receiveShadow=true;g.add(backing);
- const rows=Math.floor(height/.48),cols=Math.ceil(width/.94);
- for(let r=0;r<rows;r++){
-  const offset=r%2*.47;
-  for(let c=0;c<cols+1;c++){
-   const bx=c*.94+offset-width/2+.47;
-   if(bx < -width/2+.02||bx>width/2-.02)continue;
-   const color=brickMaterials[Math.abs((r*7+c*3)%brickMaterials.length)];
-   const b=new THREE.Mesh(new THREE.BoxGeometry(.88,.41,.12),color);
-   b.position.set(bx,r*.48+.24,.19);b.castShadow=true;b.receiveShadow=true;g.add(b);
+function buildShelf(x,z,colorIndex,rotation=0){
+ const W=3.5,D=.75;
+ const group=new THREE.Group();group.position.set(x,0,z);group.rotation.y=rotation;scene.add(group);
+ function part(w,h,d,m,px,py,pz){
+  const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(px,py,pz);o.castShadow=true;o.receiveShadow=true;group.add(o);
+ }
+ part(W,.16,D,materials.shelf,0,.45,0);
+ part(.16,3.1,.18,materials.shelf,-W/2+.08,1.9,0);
+ part(.16,3.1,.18,materials.shelf,W/2-.08,1.9,0);
+ part(W,.14,.2,materials.wood,0,3.45,0);
+ part(W,.14,.2,materials.wood,0,2.4,0);
+ part(W,.14,.2,materials.wood,0,1.4,0);
+ part(W,.14,.2,materials.wood,0,.45,0);
+ part(W,.48,.14,mat(toyColors[colorIndex]),0,3.95,-.32);
+ part(1.8,.07,.025,mat(0xc5c1e2),0,3.96,-.405);
+ for(let shelf=0;shelf<3;shelf++){
+  for(let i=0;i<5;i++){
+   const tx=-1.32+i*.66,tz=-.03;
+   const toy=addToy(x+tx,.72+shelf,z+tz,toyColors[(colorIndex+i+shelf)%toyColors.length],(i+shelf)%4,.62);
+   toy.position.set(x+tx,.72+shelf,z+tz);
+   toy.rotation.y=rotation;
   }
  }
-}
-brickWall(26,6,0,0,-13);
-brickWall(26,6,0,0,13,Math.PI);
-brickWall(26,6,-13,0,0,-Math.PI/2);
-brickWall(26,6,13,0,0,Math.PI/2);
-
-// Ceiling and beams
-box(25.5,.25,25.5,mat(0x42344e),0,6.1,0);
-[0xff5a67,0xffc857,0x42d9cc,0x8d72f6].forEach((c,i)=>{
- box(.22,.25,25,mat(c),-9.5+i*6.3,5.92,0);
-});
-
-// Canvas signs
-function labelMaterial(text,color,bg){
- const canvas=document.createElement("canvas");canvas.width=512;canvas.height=128;
- const ctx=canvas.getContext("2d");ctx.fillStyle=bg;ctx.fillRect(0,0,512,128);
- ctx.fillStyle=color;ctx.font="bold 46px Arial";ctx.textAlign="center";
- ctx.textBaseline="middle";ctx.fillText(text,256,64);
- const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
- return new THREE.MeshBasicMaterial({map:texture});
-}
-function sign(text,x,y,z,w,h,color="#ffffff",bg="#4935a6"){
- const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),labelMaterial(text,color,bg));
- m.position.set(x,y,z);scene.add(m);return m;
-}
-box(8,1.6,.28,mat(0x20283e),0,4.65,-12.55);
-sign("FIDGET WORLD",0,4.65,-12.35,7.4,1.15,"#fff16b","#4935a6");
-
-// Colorful shelves with toy displays
-function makeShelf(x,z,rotation=0){
- const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rotation;scene.add(g);
- for(const sx of [-2.25,2.25]){
-  const side=new THREE.Mesh(new THREE.BoxGeometry(.18,3.5,.55),mat(0x543522));
-  side.position.set(sx,1.75,0);side.castShadow=true;g.add(side);
- }
- const back=new THREE.Mesh(new THREE.BoxGeometry(4.7,3.5,.12),mat(0x26324a));
- back.position.set(0,1.75,-.2);g.add(back);
-
- for(let i=0;i<5;i++){
-  const y=.35+i*.7;
-  const shelf=new THREE.Mesh(new THREE.BoxGeometry(4.7,.13,.75),mat(colorOptions[i]));
-  shelf.position.set(0,y,.13);shelf.castShadow=true;g.add(shelf);
-  const strip=new THREE.Mesh(new THREE.BoxGeometry(4.7,.09,.08),mat(0xffffff));
-  strip.position.set(0,y+.02,.52);g.add(strip);
-
-  for(let j=0;j<7;j++){
-   const tx=-1.8+j*.6;
-   const toyMat=mat(colorOptions[(i*3+j)%colorOptions.length],.3,.1);
-   const type=(i+j)%3;
-   if(type===0){
-    const spinner=new THREE.Group();
-    const center=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,.1,20),mat(0xffc83d));
-    spinner.add(center);
-    for(let k=0;k<3;k++){
-     const a=k*Math.PI*2/3;
-     const lobe=new THREE.Mesh(new THREE.SphereGeometry(.15,16,12),toyMat);
-     lobe.position.set(Math.cos(a)*.25,Math.sin(a)*.25,0);spinner.add(lobe);
-    }
-    spinner.position.set(tx,y+.23,.2);g.add(spinner);
-   }else if(type===1){
-    const cube=new THREE.Mesh(new THREE.BoxGeometry(.32,.28,.3),toyMat);
-    cube.position.set(tx,y+.22,.2);cube.castShadow=true;g.add(cube);
-    for(let k=0;k<3;k++){
-     const b=new THREE.Mesh(new THREE.SphereGeometry(.045,10,8),mat(0xffc83d));
-     b.position.set(tx-.08+k*.08,y+.37,.36);g.add(b);
-    }
-   }else{
-    const ring=new THREE.Mesh(new THREE.TorusGeometry(.19,.075,10,24),toyMat);
-    ring.position.set(tx,y+.25,.2);g.add(ring);
-   }
-  }
- }
-}
-makeShelf(-9,-7,Math.PI/2);
-makeShelf(-9,-1,Math.PI/2);
-makeShelf(-9,5,Math.PI/2);
-makeShelf(9,-7,-Math.PI/2);
-makeShelf(9,-1,-Math.PI/2);
-makeShelf(9,5,-Math.PI/2);
-makeShelf(-3,-9,0);
-makeShelf(3,-9,0);
-
-// Checkout and workshop
-box(4,1.1,1.4,mat(0x7a452e),0,.55,7);
-box(4.1,.14,1.5,mat(0xffcc54),0,1.15,7);
-box(.8,.12,.65,mat(0x31394e),0,1.28,6.8);
-box(.65,.03,.5,mat(0x48e0d0),0,1.36,6.8);
-sign("CHECKOUT",0,2.05,7,2.6,.55);
-
-box(4,.18,2,mat(0xb97a43),-3,.9,3);
-for(const x of [-4.7,-1.3])for(const z of [2.3,3.7])
- box(.15,.9,.15,mat(0x543522),x,.4,z);
-sign("BUILD YOUR TOYS",-3,1.85,3.8,3.5,.6,"#ffffff","#e95c8b");
-for(let i=0;i<5;i++)cylinder(.12,.12,.1,mat(colorOptions[i]),-4.3+i*.6,1.06,3,16);
-
-// Colorful display tables
-function displayTable(x,z,color){
- box(2.5,.18,1.5,mat(color),x,.9,z);
- for(const dx of [-1,1])for(const dz of [-.55,.55])
-  box(.12,.85,.12,mat(0x543522),x+dx,.42,z+dz);
-}
-displayTable(-3,0,0xff8f70);
-displayTable(3,0,0x55d9c1);
-
-// Ceiling lights
-for(const x of [-8,-3,3,8]){
- cylinder(.035,.035,.75,mat(0x252b38),x,5.45,0);
- cylinder(.18,.75,.3,mat(0xffd16a),x,5,0);
- const light=new THREE.PointLight(0xffd69b,35,10);
- light.position.set(x,4.7,0);scene.add(light);
+ const accent=new THREE.PointLight(toyColors[colorIndex],.32,5);accent.position.set(x,2.3,z-1);scene.add(accent);
 }
 
-// Windows
-for(const x of [-4,4]){
- box(2.1,2.1,.14,mat(0x75d9ff),x,3.5,-12.6);
- box(2.25,.13,.2,mat(0xffcf50),x,3.5,-12.45);
- box(.13,2.2,.2,mat(0xffcf50),x,3.5,-12.45);
-}
+const wallShelves=[
+ [-15,-15,0],[-10,-15,1],[-5,-15,2],[0,-15,3],[5,-15,4],[10,-15,5],[15,-15,0],
+ [-15,15,1],[-10,15,2],[-5,15,3],[0,15,4],[5,15,5],[10,15,0],[15,15,1],
+ [-15,-10,2],[-15,-5,3],[-15,0,4],[-15,5,5],[-15,10,0],
+ [15,-10,1],[15,-5,2],[15,0,3],[15,5,4],[15,10,5]
+];
+wallShelves.forEach(([x,z,c])=>buildShelf(x,z,c,z===-15||z===15?0:Math.PI/2));
+const middleShelves=[
+ [-8,-10,0],[-3,-10,1],[3,-10,2],[8,-10,3],
+ [-8,-4,4],[-3,-4,5],[3,-4,0],[8,-4,1],
+ [-8,4,2],[-3,4,3],[3,4,4],[8,4,5],
+ [-8,10,0],[-3,10,1],[3,10,2],[8,10,3]
+];
+middleShelves.forEach(([x,z,c])=>buildShelf(x,z,c));
 
-// Player character customization
-const characterMaterials={
- skin:mat(0xe8b18b),hair:mat(0x49301f),shirt:mat(0x2878ff),
- pants:mat(0x343b56),shoes:mat(0x202020),eyes:mat(0x28b463)
-};
-const character=new THREE.Group();scene.add(character);
-const playerParts=[];
-function part(w,h,d,material,x,y,z){
- const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
- m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;
- character.add(m);playerParts.push(m);return m;
-}
-part(.85,1.05,.42,characterMaterials.shirt,0,1.65,0);
-part(.65,.65,.65,characterMaterials.skin,0,2.5,0);
-part(.7,.2,.7,characterMaterials.hair,0,2.88,0);
-part(.7,.18,.18,characterMaterials.hair,0,2.7,.34);
-part(.075,.075,.035,characterMaterials.eyes,-.15,2.53,.335);
-part(.075,.075,.035,characterMaterials.eyes,.15,2.53,.335);
-for(const s of [-1,1]){
- part(.25,.9,.3,characterMaterials.shirt,s*.57,1.68,0);
- part(.24,.24,.3,characterMaterials.skin,s*.57,1.12,0);
- part(.34,.85,.36,characterMaterials.pants,s*.22,.7,0);
- part(.36,.22,.5,characterMaterials.shoes,s*.22,.17,.07);
-}
+box(3.2,1.15,1.3,materials.wood,0,.58,1);
+box(3.3,.15,1.35,materials.dark,0,1.2,1);
+box(.8,.8,.1,mat(0x285e60),0,1.7,.5);
+box(.35,.2,.08,mat(0xb9c7d5),0,1.72,.43);
+box(1.5,.15,.6,mat(0x151521),0,1.38,.6);
+box(.8,.08,.3,materials.gold,0,1.5,.55);
+box(3.5,1.1,1.5,materials.wood,-5,.55,0);
+box(3.7,.16,1.6,materials.dark,-5,1.15,0);
+box(.5,.5,.5,mat(0x353b55),-5,1.48,0);
+box(.15,.8,.15,materials.gold,-5.6,1.55,0);
+box(.15,.8,.15,materials.gold,-4.4,1.55,0);
+box(1.5,.12,.12,materials.gold,-5,1.9,0);
 
-// Display pedestal and outfit preview lights
-cylinder(1.05,1.05,.18,mat(0xff71d2),5.3,.1,8);
-const previewLight=new THREE.PointLight(0x71f5ff,30,10);
-previewLight.position.set(5,4,10);scene.add(previewLight);
-character.position.set(5.3,.2,8);
-character.rotation.y=Math.PI;
-
-// Color inputs
-const defaults={
- skin:"#e8b18b",hair:"#49301f",shirt:"#2878ff",
- pants:"#343b56",shoes:"#202020",eyes:"#28b463"
-};
-const inputs={
- skin:document.getElementById("skinColor"),
- hair:document.getElementById("hairColor"),
- shirt:document.getElementById("shirtColor"),
- pants:document.getElementById("pantsColor"),
- shoes:document.getElementById("shoeColor"),
- eyes:document.getElementById("eyeColor")
-};
-function updateCharacter(){
- for(const key in inputs)characterMaterials[key].color.set(inputs[key].value);
+const player=new THREE.Group();scene.add(player);player.position.set(0,0,6);
+function rebuildPlayer(){
+ while(player.children.length){const c=player.children.pop();if(c.geometry)c.geometry.dispose();}
+ const skin=mat($("skin").value),hair=mat($("hair").value),shirt=mat($("shirt").value),pants=mat($("pants").value),shoes=mat($("shoes").value),eyes=mat($("eyes").value);
+ function p(w,h,d,m,x,y,z){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;player.add(o);}
+ p(.34,.85,.38,pants,-.22,.58,0);p(.34,.85,.38,pants,.22,.58,0);
+ p(.36,.18,.42,shoes,-.22,.13,-.035);p(.36,.18,.42,shoes,.22,.13,-.035);
+ p(.82,.85,.42,shirt,0,1.45,0);p(.25,.78,.28,shirt,-.55,1.43,0);p(.25,.78,.28,shirt,.55,1.43,0);
+ p(.25,.22,.29,skin,-.55,1.03,0);p(.25,.22,.29,skin,.55,1.03,0);
+ p(.58,.58,.5,skin,0,2.18,0);p(.6,.16,.52,hair,0,2.49,0);
+ p(.12,.18,.51,hair,-.24,2.4,0);p(.12,.18,.51,hair,.24,2.4,0);
+ p(.1,.08,.035,eyes,-.13,2.21,-.263);p(.1,.08,.035,eyes,.13,2.21,-.263);
+ p(.12,.35,.04,mat(0xa92d46),0,1.43,-.23);p(.2,.09,.04,mat(0xb9b7c7),0,1.87,-.24);
 }
-Object.values(inputs).forEach(input=>input.addEventListener("input",updateCharacter));
+rebuildPlayer();
 
-document.getElementById("randomButton").onclick=()=>{
- for(const input of Object.values(inputs)){
-  input.value="#"+Math.floor(Math.random()*16777216).toString(16).padStart(6,"0");
- }
- updateCharacter();
-};
-document.getElementById("resetButton").onclick=()=>{
- for(const key in inputs)inputs[key].value=defaults[key];
- updateCharacter();
-};
-
-// Start game
-document.getElementById("startButton").onclick=()=>{
- gameStarted=true;
- document.getElementById("startScreen").style.display="none";
- document.getElementById("hud").style.display="block";
- document.getElementById("shopPanel").style.display="block";
- document.getElementById("help").style.display="block";
- camera.position.set(0,1.7,9);
- yaw=0;pitch=0;
-};
-function toggleCustomizer(){
- document.getElementById("startScreen").style.display="flex";
- gameStarted=false;
-}
-
-// Shop system
-function updateHUD(){
- document.getElementById("cash").textContent=cash;
- document.getElementById("made").textContent=made;
- document.getElementById("sold").textContent=sold;
- document.getElementById("level").textContent=level;
-}
-let messageTimer;
-function notify(text){
- const el=document.getElementById("message");
- el.textContent=text;el.style.display="block";
- clearTimeout(messageTimer);
- messageTimer=setTimeout(()=>el.style.display="none",2200);
+const state={money:100,inventory:0,sold:0,level:1,toyCost:10,name:"Builder",started:false};
+let yaw=0,pitch=0,dragging=false,lastX=0,lastY=0,keys={},lastTime=0,messageTimer,shopOpen=false;
+function say(s){$("message").textContent=s;$("message").style.display="block";clearTimeout(messageTimer);messageTimer=setTimeout(()=>$("message").style.display="none",2400);}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function updateStats(){
+ $("stats").innerHTML="<b>👤 "+escapeHTML(state.name)+"</b><hr>💵 Money: <b>$"+state.money+"</b><br>🧸 Toys made: <b>"+state.inventory+"</b><br>🛍️ Toys sold: <b>"+state.sold+"</b><br>⭐ Shop level: <b>"+state.level+"</b>";
+ $("workshopText").textContent="You have $"+state.money+" and "+state.inventory+" toys ready to sell.";
+ $("upgradeBtn").textContent="⬆ Upgrade ($"+100*state.level+")";
 }
 function makeToy(){
- if(cash<10){notify("Not enough cash! Sell a toy first.");return;}
- cash-=10;made++;
- const toy=new THREE.Group();
- const color=colorOptions[Math.floor(Math.random()*colorOptions.length)];
- toy.add(new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,.12,32),mat(color,.25,.15)));
- const center=new THREE.Mesh(new THREE.SphereGeometry(.1,16,12),mat(0xffc83d));
- center.position.y=.1;toy.add(center);
- for(let i=0;i<3;i++){
-  const a=i*Math.PI*2/3;
-  const lobe=new THREE.Mesh(new THREE.SphereGeometry(.14,16,12),mat(colorOptions[(i+2)%7]));
-  lobe.position.set(Math.cos(a)*.27,.02,Math.sin(a)*.27);toy.add(lobe);
- }
- toy.position.set(-3+Math.random()*1.6,1.2,3+Math.random()*.5);
- scene.add(toy);toyObjects.push(toy);
- updateHUD();notify("You made a colorful fidget toy!");
+ if(state.money<state.toyCost){say("Not enough money! Sell some toys first.");return;}
+ state.money-=state.toyCost;state.inventory++;
+ addToy(-5+(Math.random()-.5)*1.8,1.4+Math.random()*.25,.7,toyColors[Math.floor(Math.random()*toyColors.length)],Math.floor(Math.random()*4),.75);
+ say("You made a new fidget toy!");updateStats();
 }
-function sellToy(){
- if(made<=sold){notify("Make a toy first!");return;}
- sold++;cash+=25;updateHUD();notify("Toy sold for $25!");
+function sellToys(){
+ if(state.inventory<=0){say("No toys to sell. Make some first!");return;}
+ const earned=state.inventory*(25+state.level*5);state.sold+=state.inventory;state.money+=earned;
+ say("Sold "+state.inventory+" toys for $"+earned+"!");state.inventory=0;updateStats();
 }
-function buyUpgrade(){
- if(cash<100){notify("You need $100 to upgrade!");return;}
- cash-=100;level++;
- makeShelf(level%2===0?-5:5,level%3,0);
- updateHUD();notify("Shop upgraded!");
+function restock(){
+ if(state.money<30){say("Restocking costs $30.");return;}
+ state.money-=30;
+ for(let i=0;i<6;i++)addToy(-9+(i%3)*.7,.72+Math.floor(i/3),-14.96,toyColors[Math.floor(Math.random()*toyColors.length)],i%4,.55);
+ say("Shelves restocked!");updateStats();
 }
-function changeLights(){
- lightMode=(lightMode+1)%4;
- const colors=[0xffd69b,0x71dfff,0xff7de3,0x9cff8a];
- scene.traverse(o=>{if(o.isPointLight)o.color.setHex(colors[lightMode]);});
- notify("Store lighting changed!");
+function upgrade(){
+ const cost=100*state.level;if(state.money<cost){say("You need $"+cost+" for the next upgrade.");return;}
+ state.money-=cost;state.level++;say("Shop upgraded to level "+state.level+"!");updateStats();
 }
+function startGame(){
+ state.name=$("playerName").value.trim()||"Builder";rebuildPlayer();state.started=true;
+ $("startScreen").style.display="none";$("hud").style.display="flex";$("stats").style.display="block";$("help").style.display="block";$("crosshair").style.display="block";
+ updateStats();camera.position.set(player.position.x,1.7,player.position.z);say("Welcome to your expanded fidget shop!");
+}
+$("startBtn").addEventListener("click",startGame);
+$("makeBtn").addEventListener("click",makeToy);$("sellBtn").addEventListener("click",sellToys);$("restockBtn").addEventListener("click",restock);$("upgradeBtn").addEventListener("click",upgrade);
+$("workMake").addEventListener("click",makeToy);$("workClose").addEventListener("click",()=>{shopOpen=false;$("shop").style.display="none";});
+$("customizeBtn").addEventListener("click",()=>{
+ $("startScreen").style.display="flex";$("startBtn").textContent="SAVE OUTFIT";
+ $("startBtn").onclick=()=>{rebuildPlayer();$("startScreen").style.display="none";$("startBtn").textContent="START GAME";$("startBtn").onclick=startGame;say("Outfit updated!");};
+});
+$("randomBtn").addEventListener("click",()=>{["skin","hair","shirt","pants","shoes","eyes"].forEach(id=>{const el=$(id);el.selectedIndex=Math.floor(Math.random()*el.options.length);});rebuildPlayer();});
+$("resetBtn").addEventListener("click",()=>{
+ $("skin").value="#b67d52";$("hair").value="#21150f";$("shirt").value="#274eaa";$("pants").value="#202c4b";$("shoes").value="#08080a";$("eyes").value="#43d67b";rebuildPlayer();
+});
+["skin","hair","shirt","pants","shoes","eyes"].forEach(id=>$(id).addEventListener("change",rebuildPlayer));
 
-// Mouse-drag camera controls; no pointer lock
-renderer.domElement.style.pointerEvents="auto";
-renderer.domElement.addEventListener("mousedown",e=>{
- if(!gameStarted)return;
+/* Replaces pointer lock: click-and-drag mouse look works in sandboxed previews. */
+renderer.domElement.addEventListener("pointerdown",e=>{
+ if(!state.started||shopOpen||e.button!==0)return;
  dragging=true;lastX=e.clientX;lastY=e.clientY;
+ renderer.domElement.style.cursor="grabbing";
 });
-window.addEventListener("mouseup",()=>dragging=false);
-window.addEventListener("mousemove",e=>{
- if(!dragging||!gameStarted)return;
- yaw-=(e.clientX-lastX)*.004;
- pitch-=(e.clientY-lastY)*.003;
+window.addEventListener("pointermove",e=>{
+ if(!dragging||!state.started)return;
+ const dx=e.clientX-lastX,dy=e.clientY-lastY;
  lastX=e.clientX;lastY=e.clientY;
- pitch=Math.max(-1.25,Math.min(1.25,pitch));
+ yaw-=dx*.003;pitch-=dy*.003;
+ pitch=Math.max(-1.35,Math.min(1.35,pitch));
 });
-renderer.domElement.addEventListener("touchstart",e=>{
- if(!gameStarted||!e.touches.length)return;
- dragging=true;lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;
-},{passive:true});
-renderer.domElement.addEventListener("touchmove",e=>{
- if(!dragging||!gameStarted||!e.touches.length)return;
- const t=e.touches[0];
- yaw-=(t.clientX-lastX)*.004;
- pitch-=(t.clientY-lastY)*.003;
- lastX=t.clientX;lastY=t.clientY;
- pitch=Math.max(-1.25,Math.min(1.25,pitch));
-},{passive:true});
-window.addEventListener("touchend",()=>dragging=false);
-
-window.addEventListener("keydown",e=>{
- keys[e.key.toLowerCase()]=true;
- if(["w","a","s","d"," "].includes(e.key.toLowerCase()))e.preventDefault();
+window.addEventListener("pointerup",()=>{dragging=false;renderer.domElement.style.cursor="crosshair";});
+window.addEventListener("blur",()=>{dragging=false;keys={};});
+document.addEventListener("keydown",e=>{
+ keys[e.code]=true;
+ if(["KeyW","KeyA","KeyS","KeyD","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(e.code))e.preventDefault();
+ if(e.code==="KeyE"&&state.started){
+  if(shopOpen)makeToy();
+  else{shopOpen=true;$("shop").style.display="block";$("workshopText").textContent="Build fidget toys here.";}
+ }
 });
-window.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+document.addEventListener("keyup",e=>keys[e.code]=false);
+document.addEventListener("contextmenu",e=>e.preventDefault());
 
-// Main loop
-function animate(){
- requestAnimationFrame(animate);
- const dt=Math.min(clock.getDelta(),.05);
-
- if(gameStarted){
-  camera.rotation.order="YXZ";
-  camera.rotation.y=yaw;
-  camera.rotation.x=pitch;
-  const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
-  const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
-  const move=new THREE.Vector3();
-  if(keys.w||keys.arrowup)move.add(forward);
-  if(keys.s||keys.arrowdown)move.sub(forward);
-  if(keys.d||keys.arrowright)move.add(right);
-  if(keys.a||keys.arrowleft)move.sub(right);
-  if(move.lengthSq()>0){
-   move.normalize().multiplyScalar(5.5*dt);
-   const nx=camera.position.x+move.x,nz=camera.position.z+move.z;
-   if(nx>-11.9&&nx<11.9)camera.position.x=nx;
-   if(nz>-11.8&&nz<11.8)camera.position.z=nz;
-  }
-  camera.position.y=1.7;
-  toyObjects.forEach((toy,i)=>{
-   toy.rotation.y+=dt;
-   toy.position.y=1.2+Math.sin(clock.elapsedTime*2+i)*.035;
-  });
+function animate(time){
+ requestAnimationFrame(animate);const dt=Math.min((time-lastTime)/1000||0,.05);lastTime=time;
+ if(state.started){
+  const f=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),r=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw)),m=new THREE.Vector3();
+  if(keys.KeyW||keys.ArrowUp)m.add(f);if(keys.KeyS||keys.ArrowDown)m.sub(f);if(keys.KeyD||keys.ArrowRight)m.add(r);if(keys.KeyA||keys.ArrowLeft)m.sub(r);
+  if(m.lengthSq()>0)m.normalize().multiplyScalar((keys.ShiftLeft||keys.ShiftRight?8:5)*dt),player.position.add(m);
+  player.position.x=Math.max(-18,Math.min(18,player.position.x));player.position.z=Math.max(-18,Math.min(18,player.position.z));
+  camera.position.set(player.position.x,player.position.y+1.7,player.position.z);
+  camera.rotation.order="YXZ";camera.rotation.y=yaw;camera.rotation.x=pitch;
+  player.visible=false;
+  toys.forEach((toy,i)=>{if(i>=30)toy.rotation.y+=dt*.6;});
  }else{
-  // Orbit the character preview while customizing
-  camera.position.set(
-   5.3+Math.sin(clock.elapsedTime*.35)*.2,
-   2.1,
-   12
-  );
-  camera.lookAt(5.3,1.65,8);
-  character.rotation.y=Math.PI+Math.sin(clock.elapsedTime*.35)*.08;
+  camera.position.set(0,3.2,11);camera.lookAt(0,1.3,0);player.visible=true;player.rotation.y=Math.sin(time*.0005)*.3;
  }
  renderer.render(scene,camera);
 }
-animate();
-
-window.addEventListener("resize",()=>{
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
-});
-updateHUD();
+window.addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+updateStats();requestAnimationFrame(animate);
 })();
 </script>
 </body>
